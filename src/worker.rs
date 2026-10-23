@@ -74,12 +74,20 @@ pub async fn run_worker(
     });
 
     // 3. Worker loop: listening for UI actions and periodic polling
-    let mut poll_interval = tokio::time::interval(Duration::from_millis(2000));
+    let mut poll_interval = tokio::time::interval(Duration::from_millis(1500));
+    let mut current_volume: u8 = 80;
 
     loop {
         tokio::select! {
             _ = poll_interval.tick() => {
                 let pb = extract_playback_info(&client, &config.featured_track_ids).await;
+                if let Some(info) = &pb {
+                    if let Some(vol) = info.device_volume {
+                        if vol > 0 {
+                            current_volume = vol as u8;
+                        }
+                    }
+                }
                 let _ = update_tx.send(Update::PlaybackChanged(pb)).await;
             }
 
@@ -107,17 +115,28 @@ pub async fn run_worker(
                     }
 
                     Some(Action::PlayTrack(track_id)) => {
-                        match spotify::play_track(&client, &track_id, None).await {
-                            Ok(_) => {
-                                let _ = update_tx.send(Update::Status(format!("▶ Afspelen gestart!"))).await;
-                                sleep(Duration::from_millis(300)).await;
-                                let pb = extract_playback_info(&client, &config.featured_track_ids).await;
-                                let _ = update_tx.send(Update::PlaybackChanged(pb)).await;
-                            }
-                            Err(e) => {
-                                let _ = update_tx.send(Update::Error(format!("Kon niet afspelen: {}", e))).await;
-                            }
-                        }
+                        let client_clone = client.clone();
+                        let vol = current_volume;
+                        let ids = vec![track_id];
+                        tokio::spawn(async move {
+                            let _ = spotify::fade_transition_to_queue(&client_clone, &ids, vol, None).await;
+                        });
+
+                        sleep(Duration::from_millis(600)).await;
+                        let pb = extract_playback_info(&client, &config.featured_track_ids).await;
+                        let _ = update_tx.send(Update::PlaybackChanged(pb)).await;
+                    }
+
+                    Some(Action::PlayQueue(track_ids)) => {
+                        let client_clone = client.clone();
+                        let vol = current_volume;
+                        tokio::spawn(async move {
+                            let _ = spotify::fade_transition_to_queue(&client_clone, &track_ids, vol, None).await;
+                        });
+
+                        sleep(Duration::from_millis(600)).await;
+                        let pb = extract_playback_info(&client, &config.featured_track_ids).await;
+                        let _ = update_tx.send(Update::PlaybackChanged(pb)).await;
                     }
 
                     Some(Action::RescueTrack(track_id)) => {

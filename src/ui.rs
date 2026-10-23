@@ -35,8 +35,13 @@ pub fn render(frame: &mut Frame, app: &App) {
 
 fn render_header(frame: &mut Frame, area: Rect, app: &App) {
     let boost_badge = if app.boost_mode {
+        let current_sec = app
+            .playback
+            .as_ref()
+            .map(|p| p.progress_ms / 1000)
+            .unwrap_or(0);
         Span::styled(
-            format!(" [BOOST ON ({}s)] ", app.target_boost_skip),
+            format!(" [⚡ BOOST: {}s/{}s] ", current_sec, app.target_boost_skip),
             Style::default().bg(Color::Magenta).fg(Color::White).bold(),
         )
     } else {

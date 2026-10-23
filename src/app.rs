@@ -1,7 +1,7 @@
 #![allow(dead_code)]
 
 use rand::Rng;
-use rspotify::model::Device;
+use rspotify::model::{Device, Id};
 use std::time::Instant;
 
 use crate::config::{AppConfig, RescuedStats};
@@ -18,6 +18,7 @@ pub enum InputMode {
 pub enum Action {
     PlayPause,
     PlayTrack(String),
+    PlayQueue(Vec<String>),
     NextTrack,
     RescueTrack(String),
     FollowArtist(String),
@@ -71,6 +72,8 @@ pub struct App {
     pub genre_input: String,
     pub is_loading: bool,
     pub is_replenishing: bool,
+    pub is_transitioning: bool,
+    pub last_handled_track_id: Option<String>,
     pub should_quit: bool,
 }
 
@@ -95,6 +98,8 @@ impl App {
             genre_input: String::new(),
             is_loading: false,
             is_replenishing: false,
+            is_transitioning: false,
+            last_handled_track_id: None,
             should_quit: false,
         }
     }
@@ -127,6 +132,14 @@ impl App {
         }
 
         self.queue.get(self.queue_index).cloned()
+    }
+
+    pub fn get_remaining_track_ids(&self) -> Vec<String> {
+        self.queue
+            .iter()
+            .skip(self.queue_index)
+            .filter_map(|item| item.track.id.as_ref().map(|id| id.id().to_string()))
+            .collect()
     }
 
     pub fn select_queue_index(&mut self, index: usize) -> Option<DiscoveredTrack> {

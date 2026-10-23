@@ -41,18 +41,40 @@ pub async fn run_tui(config: AppConfig) -> Result<()> {
     while !app.should_quit {
         tokio::select! {
             _ = tick_interval.tick() => {
+                let mut should_advance = false;
+                let mut advance_reason = "";
+
                 if let Some(pb) = &mut app.playback {
                     if pb.is_playing && pb.duration_ms > 0 {
                         pb.progress_ms = (pb.progress_ms + 100).min(pb.duration_ms);
 
-                        if app.boost_mode && pb.progress_ms >= app.target_boost_skip * 1000 {
-                            if let Some(next) = app.next_queue_item() {
-                                if let Some(id) = next.track.id {
-                                    let _ = action_tx.send(Action::PlayTrack(id.id().to_string())).await;
-                                    app.reset_boost_jitter();
-                                    app.set_status(format!("⚡ Smart Boost: doorgespoeld na {}s voor stream-credit!", app.target_boost_skip));
-                                }
-                            }
+                        let current_id = pb.track_id.as_deref().unwrap_or("").to_string();
+                        let already_handled = app.last_handled_track_id.as_deref() == Some(&current_id);
+
+                        // 1. Smart Boost Trigger: auto-skip after 35-45s
+                        if app.boost_mode && !already_handled && pb.progress_ms >= app.target_boost_skip * 1000 {
+                            should_advance = true;
+                            advance_reason = "⚡ Smart Boost";
+                            app.last_handled_track_id = Some(current_id.clone());
+                        }
+
+                        // 2. Track Ended Trigger: auto-advance when reaching the end of the song
+                        if !already_handled && pb.progress_ms >= pb.duration_ms.saturating_sub(1200) {
+                            should_advance = true;
+                            advance_reason = "Track afgelopen";
+                            app.last_handled_track_id = Some(current_id);
+                        }
+                    }
+                }
+
+                if should_advance && !app.is_transitioning {
+                    if let Some(next) = app.next_queue_item() {
+                        app.is_transitioning = true;
+                        app.reset_boost_jitter();
+                        let remaining_ids = app.get_remaining_track_ids();
+                        if !remaining_ids.is_empty() {
+                            let _ = action_tx.send(Action::PlayQueue(remaining_ids)).await;
+                            app.set_status(format!("{} ➔ Fade naar: {}", advance_reason, next.track.name));
                         }
                     }
                 }
@@ -71,6 +93,20 @@ pub async fn run_tui(config: AppConfig) -> Result<()> {
             Some(update) = update_rx.recv() => {
                 match update {
                     Update::PlaybackChanged(pb) => {
+                        if let Some(info) = &pb {
+                            if let Some(new_id) = &info.track_id {
+                                if app.last_handled_track_id.as_ref() != Some(new_id) {
+                                    app.is_transitioning = false;
+                                }
+
+                                // Sync queue index with active playing track
+                                if let Some(idx) = app.queue.iter().position(|t| {
+                                    t.track.id.as_ref().map(|id| id.id()) == Some(new_id.as_str())
+                                }) {
+                                    app.queue_index = idx;
+                                }
+                            }
+                        }
                         app.playback = pb;
                     }
                     Update::TracksDiscovered(tracks) => {
@@ -124,9 +160,10 @@ pub async fn run_tui(config: AppConfig) -> Result<()> {
                                     }
                                     KeyCode::Char('n') => {
                                         if let Some(next) = app.next_queue_item() {
-                                            if let Some(id) = next.track.id {
-                                                let _ = action_tx.send(Action::PlayTrack(id.id().to_string())).await;
-                                                app.set_status(format!("▶ Afspelen: {}", next.track.name));
+                                            let remaining_ids = app.get_remaining_track_ids();
+                                            if !remaining_ids.is_empty() {
+                                                let _ = action_tx.send(Action::PlayQueue(remaining_ids)).await;
+                                                app.set_status(format!("▶ Crossfade naar: {}", next.track.name));
                                             }
                                         }
                                     }
@@ -188,9 +225,10 @@ pub async fn run_tui(config: AppConfig) -> Result<()> {
                                     }
                                     KeyCode::Enter => {
                                         if let Some(selected) = app.queue.get(app.queue_index) {
-                                            if let Some(id) = &selected.track.id {
-                                                let _ = action_tx.send(Action::PlayTrack(id.id().to_string())).await;
-                                                app.set_status(format!("▶ Afspelen: {}", selected.track.name));
+                                            let remaining_ids = app.get_remaining_track_ids();
+                                            if !remaining_ids.is_empty() {
+                                                let _ = action_tx.send(Action::PlayQueue(remaining_ids)).await;
+                                                app.set_status(format!("▶ Crossfade naar: {}", selected.track.name));
                                             }
                                         }
                                     }

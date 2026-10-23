@@ -119,6 +119,72 @@ pub async fn play_track(
     Ok(())
 }
 
+/// Start playing a list/queue of tracks starting from the first one
+pub async fn play_queue_from(
+    spotify: &AuthCodePkceSpotify,
+    track_ids: &[String],
+    device_id: Option<&str>,
+) -> Result<()> {
+    let mut playables = Vec::new();
+    for id in track_ids {
+        if let Ok(track) = TrackId::from_id_or_uri(id) {
+            playables.push(PlayableId::Track(track));
+        }
+    }
+
+    if playables.is_empty() {
+        bail!("Geen geldige tracks om af te spelen.");
+    }
+
+    spotify
+        .start_uris_playback(playables, device_id, None, None)
+        .await
+        .context("Kon afspeellijst niet starten op Spotify Connect apparaat.")?;
+    Ok(())
+}
+
+/// Set volume percent (0 - 100) on active device
+pub async fn set_volume(
+    spotify: &AuthCodePkceSpotify,
+    volume_percent: u8,
+    device_id: Option<&str>,
+) -> Result<()> {
+    spotify
+        .volume(volume_percent, device_id)
+        .await
+        .context("Kon volume niet instellen")?;
+    Ok(())
+}
+
+/// Smooth crossfade transition: ramps volume down, switches track queue, and ramps volume back up
+pub async fn fade_transition_to_queue(
+    spotify: &AuthCodePkceSpotify,
+    track_ids: &[String],
+    initial_volume: u8,
+    device_id: Option<&str>,
+) -> Result<()> {
+    let target_vol = initial_volume.clamp(15, 100);
+
+    // 1. Smooth fade out (3 quick steps over ~300ms)
+    for step in [60, 25, 0] {
+        let vol = ((target_vol as u32 * step) / 100) as u8;
+        let _ = spotify.volume(vol, device_id).await;
+        tokio::time::sleep(std::time::Duration::from_millis(90)).await;
+    }
+
+    // 2. Start new track queue
+    play_queue_from(spotify, track_ids, device_id).await?;
+
+    // 3. Smooth fade in (4 quick steps over ~400ms)
+    for step in [25, 55, 80, 100] {
+        tokio::time::sleep(std::time::Duration::from_millis(90)).await;
+        let vol = ((target_vol as u32 * step) / 100) as u8;
+        let _ = spotify.volume(vol, device_id).await;
+    }
+
+    Ok(())
+}
+
 /// Pause playback
 pub async fn pause(spotify: &AuthCodePkceSpotify, device_id: Option<&str>) -> Result<()> {
     spotify

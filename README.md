@@ -1,6 +1,19 @@
 # Sub-1K Radio (`sub1k`)
 
+[![Crates.io](https://img.shields.io/crates/v/sub1k.svg)](https://crates.io/crates/sub1k)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Build & Test](https://github.com/fabjan4u/sub1k/actions/workflows/ci.yml/badge.svg)](https://github.com/fabjan4u/sub1k/actions)
+
 > A terminal player designed to rescue indie tracks from Spotify's <1000 stream demonetization threshold.
+
+---
+
+## ⚡ Quick Install
+
+```bash
+cargo install sub1k
+```
+*(Or download pre-built binaries for Linux, macOS and Windows from [Releases](https://github.com/fabjan4u/sub1k/releases))*
 
 ---
 

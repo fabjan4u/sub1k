@@ -1,0 +1,21 @@
+# Configuration for sub1k-sync (Spotify Underdog Auto-Curator)
+# Designed to run headless in GitHub Actions or locally as a cronjob.
+
+[settings]
+# Maximum Spotify popularity index (0-3 is typically < 1,000 streams)
+max_popularity = 3
+
+# Target number of tracks per playlist
+playlist_size = 50
+
+# Name of the anchor/curator artist to highlight
+anchor_artist = "THE SILICON RITE"
+
+# Maximum position in playlist to inject the anchor track (0-indexed: 0..=4 means top 5)
+anchor_max_position = 4
+
+[[playlists]]
+name = "Dark Electronic & Industrial Underdogs [<1K Streams]"
+spotify_playlist_id = "1kmZVpw99RovDgeLYfHoPa"
+genres = ["darksynth", "industrial", "ebm", "cyberpunk"]
+anchor_track_query = "artist:\"THE SILICON RITE\""

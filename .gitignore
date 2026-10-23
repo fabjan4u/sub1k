@@ -1,5 +1,6 @@
 /target
 .spotify_token_cache.json
+.sub1k_sync_token.json
 .env
 *.token
 rescued_stats.json

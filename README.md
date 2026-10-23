@@ -70,3 +70,39 @@ sub1k devices         # List all Spotify Connect devices
 sub1k play <TRACK_ID> # Play a specific track
 sub1k rescue <TRACK_ID> # Save a track to Liked Songs
 ```
+
+---
+
+## 🤖 `sub1k-sync`: Zero-Maintenance Spotify Auto-Curator
+
+Want to run your own automated radio station on Spotify that refreshes daily and runs **100% free on GitHub Actions**?
+
+`sub1k-sync` is a headless daemon that scans Spotify for tracks under 1,000 streams across your favourite genres, updates your playlists every morning at 04:00 UTC, and anchors your own artist in the top slots.
+
+### Quick Setup for GitHub Actions:
+
+1. **Fork or clone** this repository.
+2. Configure your playlists in `playlists.toml`:
+   ```toml
+   [settings]
+   max_popularity = 3
+   playlist_size = 50
+   anchor_artist = "THE SILICON RITE"
+   anchor_max_position = 4
+
+   [[playlists]]
+   name = "Underground Industrial & Dark Synth [<1K Streams]"
+   spotify_playlist_id = "YOUR_PLAYLIST_ID"
+   genres = ["darksynth", "industrial", "ebm"]
+   anchor_track_query = "artist:\"THE SILICON RITE\" RAGNARÖK"
+   ```
+3. Run the one-time authentication locally to get your `SPOTIFY_REFRESH_TOKEN`:
+   ```bash
+   cargo run --bin sub1k-sync -- auth --client-id <ID> --client-secret <SECRET>
+   ```
+4. Add the 3 secrets to your GitHub Repository (**Settings $\rightarrow$ Secrets and variables $\rightarrow$ Actions**):
+   * `RSPOTIFY_CLIENT_ID`
+   * `RSPOTIFY_CLIENT_SECRET`
+   * `SPOTIFY_REFRESH_TOKEN`
+5. Enable GitHub Actions (`.github/workflows/daily_sync.yml`). Your playlists will automatically refresh daily!
+

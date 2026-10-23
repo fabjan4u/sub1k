@@ -27,6 +27,14 @@ pub struct AppConfig {
     #[serde(default = "default_genre")]
     pub default_genre: String,
 
+    /// Minimum seconds in Smart Boost mode before skipping (Spotify requires > 30s)
+    #[serde(default = "default_boost_min")]
+    pub boost_min_seconds: u32,
+
+    /// Maximum seconds in Smart Boost mode
+    #[serde(default = "default_boost_max")]
+    pub boost_max_seconds: u32,
+
     /// Include featured creator/seed track in matching genres
     #[serde(default = "default_true")]
     pub include_featured: bool,
@@ -55,6 +63,14 @@ fn default_max_popularity() -> u32 {
 
 fn default_genre() -> String {
     "synthwave".to_string()
+}
+
+fn default_boost_min() -> u32 {
+    40
+}
+
+fn default_boost_max() -> u32 {
+    60
 }
 
 fn default_true() -> bool {
@@ -99,6 +115,8 @@ impl Default for AppConfig {
             redirect_uri: default_redirect_uri(),
             max_popularity: default_max_popularity(),
             default_genre: default_genre(),
+            boost_min_seconds: default_boost_min(),
+            boost_max_seconds: default_boost_max(),
             include_featured: true,
             featured_artist_name: default_featured_artist_name(),
             featured_artist_id: default_featured_artist_id(),

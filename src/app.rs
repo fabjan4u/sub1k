@@ -65,7 +65,8 @@ pub struct App {
     pub available_devices: Vec<Device>,
     pub device_index: usize,
     pub boost_mode: bool,
-    pub target_boost_skip: u32, // Smart Boost jitter: skips after 35-45s
+    pub target_boost_skip: u32, // Smart Boost jitter: skips after 40-60s
+    pub current_track_played_ms: u32,
     pub rescued_count: u32,
     pub status_message: Option<(String, Instant)>,
     pub input_mode: InputMode,
@@ -80,7 +81,9 @@ pub struct App {
 impl App {
     pub fn new(config: AppConfig) -> Self {
         let genre = config.default_genre.clone();
-        let target_boost_skip = rand::thread_rng().gen_range(35..=45);
+        let min_sec = config.boost_min_seconds.max(35);
+        let max_sec = config.boost_max_seconds.max(min_sec);
+        let target_boost_skip = rand::thread_rng().gen_range(min_sec..=max_sec);
         let rescued_count = RescuedStats::load().total_rescued;
         Self {
             config,
@@ -92,6 +95,7 @@ impl App {
             device_index: 0,
             boost_mode: false,
             target_boost_skip,
+            current_track_played_ms: 0,
             rescued_count,
             status_message: None,
             input_mode: InputMode::Normal,
@@ -117,7 +121,10 @@ impl App {
     }
 
     pub fn reset_boost_jitter(&mut self) {
-        self.target_boost_skip = rand::thread_rng().gen_range(35..=45);
+        let min_sec = self.config.boost_min_seconds.max(35);
+        let max_sec = self.config.boost_max_seconds.max(min_sec);
+        self.target_boost_skip = rand::thread_rng().gen_range(min_sec..=max_sec);
+        self.current_track_played_ms = 0;
     }
 
     pub fn next_queue_item(&mut self) -> Option<DiscoveredTrack> {

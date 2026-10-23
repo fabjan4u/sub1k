@@ -47,12 +47,18 @@ pub async fn run_tui(config: AppConfig) -> Result<()> {
                 if let Some(pb) = &mut app.playback {
                     if pb.is_playing && pb.duration_ms > 0 {
                         pb.progress_ms = (pb.progress_ms + 100).min(pb.duration_ms);
+                        app.current_track_played_ms += 100;
 
                         let current_id = pb.track_id.as_deref().unwrap_or("").to_string();
                         let already_handled = app.last_handled_track_id.as_deref() == Some(&current_id);
 
-                        // 1. Smart Boost Trigger: auto-skip after 35-45s
-                        if app.boost_mode && !already_handled && pb.progress_ms >= app.target_boost_skip * 1000 {
+                        // 1. Smart Boost Trigger: auto-skip after 40-60s (always >= 35s)
+                        let safe_threshold = (app.target_boost_skip * 1000).max(35_000);
+                        if app.boost_mode
+                            && !already_handled
+                            && app.current_track_played_ms >= safe_threshold
+                            && pb.progress_ms >= safe_threshold
+                        {
                             should_advance = true;
                             advance_reason = "⚡ Smart Boost";
                             app.last_handled_track_id = Some(current_id.clone());
@@ -97,6 +103,7 @@ pub async fn run_tui(config: AppConfig) -> Result<()> {
                             if let Some(new_id) = &info.track_id {
                                 if app.last_handled_track_id.as_ref() != Some(new_id) {
                                     app.is_transitioning = false;
+                                    app.current_track_played_ms = 0;
                                 }
 
                                 // Sync queue index with active playing track

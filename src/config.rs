@@ -170,6 +170,22 @@ impl AppConfig {
 
     /// Load config from file or environment, creating default config file if missing
     pub fn load() -> Result<Self> {
+        let config_dir = Self::config_dir();
+        if !config_dir.exists() {
+            fs::create_dir_all(&config_dir)
+                .with_context(|| format!("Kon directory niet aanmaken: {:?}", config_dir))?;
+        }
+
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let _ = fs::set_permissions(&config_dir, fs::Permissions::from_mode(0o700));
+            let token_path = Self::token_cache_path();
+            if token_path.exists() {
+                let _ = fs::set_permissions(&token_path, fs::Permissions::from_mode(0o600));
+            }
+        }
+
         let config_path = Self::config_file_path();
         let mut config: AppConfig = if config_path.exists() {
             let content = fs::read_to_string(&config_path)

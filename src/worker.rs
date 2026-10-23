@@ -45,6 +45,7 @@ pub async fn run_worker(
 
     // 2. Initial background dig on default genre
     let initial_genre = config.default_genre.clone();
+    let initial_limit = config.queue_initial_limit;
     let initial_digger = digger.clone();
     let initial_tx = update_tx.clone();
     tokio::spawn(async move {
@@ -54,7 +55,10 @@ pub async fn run_worker(
                 initial_genre
             )))
             .await;
-        match initial_digger.dig_tracks(&initial_genre, 15).await {
+        match initial_digger
+            .dig_tracks(&initial_genre, initial_limit)
+            .await
+        {
             Ok(tracks) => {
                 let count = tracks.len();
                 let _ = initial_tx.send(Update::TracksDiscovered(tracks)).await;
@@ -164,10 +168,11 @@ pub async fn run_worker(
 
                     Some(Action::DigGenre(genre)) => {
                         let digger_clone = digger.clone();
+                        let limit = config.queue_initial_limit;
                         let tx = update_tx.clone();
                         tokio::spawn(async move {
                             let _ = tx.send(Update::Status(format!("🔍 Tracks opgraven voor '{}'...", genre))).await;
-                            match digger_clone.dig_tracks(&genre, 15).await {
+                            match digger_clone.dig_tracks(&genre, limit).await {
                                 Ok(tracks) => {
                                     let count = tracks.len();
                                     let _ = tx.send(Update::TracksDiscovered(tracks)).await;
@@ -182,9 +187,10 @@ pub async fn run_worker(
 
                     Some(Action::ReplenishQueue(genre)) => {
                         let digger_clone = digger.clone();
+                        let replenish_limit = config.queue_replenish_limit;
                         let tx = update_tx.clone();
                         tokio::spawn(async move {
-                            if let Ok(tracks) = digger_clone.dig_tracks(&genre, 15).await {
+                            if let Ok(tracks) = digger_clone.dig_tracks(&genre, replenish_limit).await {
                                 let _ = tx.send(Update::TracksDiscovered(tracks)).await;
                             }
                         });

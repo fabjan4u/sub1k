@@ -76,7 +76,7 @@ impl CrateDigger {
         let alphabet: Vec<char> = ('a'..='z').collect();
 
         let mut attempts = 0;
-        let max_attempts = 8;
+        let max_attempts = ((limit / 4) * 3).max(25);
 
         while obscure_tracks.len() < limit && attempts < max_attempts {
             attempts += 1;

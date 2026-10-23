@@ -35,6 +35,14 @@ pub struct AppConfig {
     #[serde(default = "default_boost_max")]
     pub boost_max_seconds: u32,
 
+    /// Initial number of tracks to dig up when loading a genre (default: 15)
+    #[serde(default = "default_initial_limit")]
+    pub queue_initial_limit: usize,
+
+    /// Number of tracks to dig up when auto-replenishing the queue (default: 15)
+    #[serde(default = "default_replenish_limit")]
+    pub queue_replenish_limit: usize,
+
     /// Include featured creator/seed track in matching genres
     #[serde(default = "default_true")]
     pub include_featured: bool,
@@ -71,6 +79,14 @@ fn default_boost_min() -> u32 {
 
 fn default_boost_max() -> u32 {
     60
+}
+
+fn default_initial_limit() -> usize {
+    15
+}
+
+fn default_replenish_limit() -> usize {
+    15
 }
 
 fn default_true() -> bool {
@@ -117,6 +133,8 @@ impl Default for AppConfig {
             default_genre: default_genre(),
             boost_min_seconds: default_boost_min(),
             boost_max_seconds: default_boost_max(),
+            queue_initial_limit: default_initial_limit(),
+            queue_replenish_limit: default_replenish_limit(),
             include_featured: true,
             featured_artist_name: default_featured_artist_name(),
             featured_artist_id: default_featured_artist_id(),

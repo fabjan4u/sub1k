@@ -73,6 +73,8 @@ struct Settings {
     playlist_size: usize,
     anchor_artist: String,
     anchor_max_position: usize,
+    /// Optional webhook URL (e.g. n8n) to trigger when playlists are synced
+    webhook_url: Option<String>,
 }
 
 #[derive(Deserialize, Debug)]
@@ -318,9 +320,11 @@ async fn run_sync(config_path: &str, dry_run: bool) -> Result<()> {
 
         println!("  ✨ {} obscure tracks gevonden.", tracks.len());
 
+        let mut anchor_track_name = String::new();
         // Zoek de anchor track op en plaats deze in de top posities
         if let Ok(Some(anchor_track)) = fetch_anchor_track(&spotify, &pl.anchor_track_query).await {
             tracks.retain(|t| t.id != anchor_track.id);
+            anchor_track_name = anchor_track.name.clone();
 
             let max_pos = config.settings.anchor_max_position.min(tracks.len());
             let insert_idx = if max_pos > 0 {
@@ -377,6 +381,63 @@ async fn run_sync(config_path: &str, dry_run: bool) -> Result<()> {
 
         summary_lines.push(format!("### {}", pl.name));
         summary_lines.push(format!("Bijgewerkt met **{}** tracks.", tracks.len()));
+
+        // Webhook afvuren naar n8n (indien geconfigureerd via env of config)
+        let webhook_url = env::var("N8N_WEBHOOK_URL")
+            .or_else(|_| env::var("WEBHOOK_URL"))
+            .ok()
+            .or_else(|| config.settings.webhook_url.clone());
+
+        if let Some(target_url) = webhook_url {
+            if !target_url.is_empty() && !dry_run {
+                println!("  📡 Verzenden van sync-notificatie naar webhook: {}", target_url);
+
+                let artist_names: Vec<String> = tracks
+                    .iter()
+                    .filter_map(|t| t.artists.first().map(|a| a.name.clone()))
+                    .collect();
+
+                let featured_samples: Vec<String> = artist_names
+                    .iter()
+                    .filter(|a| a.as_str() != config.settings.anchor_artist)
+                    .take(3)
+                    .cloned()
+                    .collect();
+
+                let tweet_text = format!(
+                    "🚨 Fresh <1K Underground Radio live on Spotify! Featuring {} + {}. Listen: https://open.spotify.com/playlist/{} #darksynth #cyberpunk #industrial #indie",
+                    config.settings.anchor_artist,
+                    featured_samples.join(", "),
+                    pl.spotify_playlist_id
+                );
+
+                let payload = serde_json::json!({
+                    "event": "playlist_updated",
+                    "playlist_name": pl.name,
+                    "playlist_id": pl.spotify_playlist_id,
+                    "playlist_url": format!("https://open.spotify.com/playlist/{}", pl.spotify_playlist_id),
+                    "anchor_artist": config.settings.anchor_artist,
+                    "anchor_track": anchor_track_name,
+                    "total_tracks": tracks.len(),
+                    "artists": artist_names,
+                    "tweet_text": tweet_text,
+                    "timestamp": chrono::Utc::now().to_rfc3339()
+                });
+
+                let client = reqwest::Client::new();
+                match client.post(&target_url).json(&payload).send().await {
+                    Ok(resp) if resp.status().is_success() => {
+                        println!("  ✅ Webhook succesvol afgeleverd aan n8n!");
+                    }
+                    Ok(resp) => {
+                        eprintln!("  ⚠️ Webhook HTTP status: {}", resp.status());
+                    }
+                    Err(e) => {
+                        eprintln!("  ⚠️ Kon webhook niet bereiken: {}", e);
+                    }
+                }
+            }
+        }
     }
 
     // Schrijf een GitHub Action Step Summary indien beschikbaar

@@ -14,6 +14,10 @@ anchor_artist = "THE SILICON RITE"
 # Maximum position in playlist to inject the anchor track (0-indexed: 0..=4 means top 5)
 anchor_max_position = 4
 
+# Optional: Webhook URL (e.g. n8n on Oracle VPS) to automatically post updates to X / Discord
+# Can also be provided via N8N_WEBHOOK_URL environment variable / GitHub Secret
+# webhook_url = "http://152.70.55.9:5678/webhook/spotify-sync"
+
 [[playlists]]
 name = "Dark Electronic & Industrial Underdogs [<1K Streams]"
 spotify_playlist_id = "1kmZVpw99RovDgeLYfHoPa"

@@ -26,4 +26,5 @@ jobs:
           RSPOTIFY_CLIENT_ID: ${{ secrets.RSPOTIFY_CLIENT_ID }}
           RSPOTIFY_CLIENT_SECRET: ${{ secrets.RSPOTIFY_CLIENT_SECRET }}
           SPOTIFY_REFRESH_TOKEN: ${{ secrets.SPOTIFY_REFRESH_TOKEN }}
+          N8N_WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL }}
         run: cargo run --release --bin sub1k-sync -- sync --config playlists.toml

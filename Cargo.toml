@@ -3,6 +3,12 @@ name = "sub1k"
 version = "0.1.0"
 edition = "2021"
 description = "A terminal player designed to rescue indie tracks from Spotify's <1000 stream demonetization threshold."
+license = "MIT"
+repository = "https://github.com/fabjan4u/sub1k"
+homepage = "https://github.com/fabjan4u/sub1k"
+readme = "README.md"
+keywords = ["spotify", "tui", "music", "indie", "ratatui"]
+categories = ["command-line-utilities", "multimedia::audio"]
 
 [dependencies]
 tokio = { version = "1.40", features = ["full"] }

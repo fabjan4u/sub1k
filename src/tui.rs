@@ -157,10 +157,12 @@ pub async fn run_tui(config: AppConfig) -> Result<()> {
                                     KeyCode::Char('q') => {
                                         app.should_quit = true;
                                         let _ = action_tx.send(Action::Quit).await;
+                                        tokio::time::sleep(Duration::from_millis(250)).await;
                                     }
                                     KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                                         app.should_quit = true;
                                         let _ = action_tx.send(Action::Quit).await;
+                                        tokio::time::sleep(Duration::from_millis(250)).await;
                                     }
                                     KeyCode::Char(' ') => {
                                         let _ = action_tx.send(Action::PlayPause).await;
@@ -299,6 +301,10 @@ pub async fn run_tui(config: AppConfig) -> Result<()> {
             }
         }
     }
+
+    // Ensure Spotify playback is paused on exit
+    let _ = action_tx.send(Action::Quit).await;
+    tokio::time::sleep(Duration::from_millis(250)).await;
 
     disable_raw_mode()?;
     execute!(terminal.backend_mut(), LeaveAlternateScreen)?;

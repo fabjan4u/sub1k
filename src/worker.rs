@@ -227,6 +227,7 @@ pub async fn run_worker(
                     }
 
                     Some(Action::Quit) | None => {
+                        let _ = spotify::pause(&client, None).await;
                         break;
                     }
                 }

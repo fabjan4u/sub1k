@@ -82,7 +82,7 @@ struct PlaylistConfig {
     name: String,
     spotify_playlist_id: String,
     genres: Vec<String>,
-    anchor_track_query: String,
+    anchor_track_query: Option<String>,
 }
 
 /// Helper function to retrieve credentials from env variables
@@ -310,36 +310,47 @@ async fn run_sync(config_path: &str, dry_run: bool) -> Result<()> {
         }
 
         println!("  🔍 Graven naar tracks met populariteit <= {}...", config.settings.max_popularity);
+        let has_anchor = pl.anchor_track_query.as_ref().map(|q| !q.trim().is_empty()).unwrap_or(false);
+        let target_harvest = if has_anchor {
+            config.settings.playlist_size.saturating_sub(1)
+        } else {
+            config.settings.playlist_size
+        };
+
         let mut tracks = harvest_underdog_tracks(
             &spotify,
             &pl.genres,
             config.settings.max_popularity,
-            config.settings.playlist_size.saturating_sub(1),
+            target_harvest,
         )
         .await?;
 
         println!("  ✨ {} obscure tracks gevonden.", tracks.len());
 
         let mut anchor_track_name = String::new();
-        // Zoek de anchor track op en plaats deze in de top posities
-        if let Ok(Some(anchor_track)) = fetch_anchor_track(&spotify, &pl.anchor_track_query).await {
-            tracks.retain(|t| t.id != anchor_track.id);
-            anchor_track_name = anchor_track.name.clone();
+        // Zoek de anchor track op en plaats deze in de top posities (indien geconfigureerd)
+        if let Some(ref query) = pl.anchor_track_query {
+            if !query.trim().is_empty() {
+                if let Ok(Some(anchor_track)) = fetch_anchor_track(&spotify, query).await {
+                    tracks.retain(|t| t.id != anchor_track.id);
+                    anchor_track_name = anchor_track.name.clone();
 
-            let max_pos = config.settings.anchor_max_position.min(tracks.len());
-            let insert_idx = if max_pos > 0 {
-                rand::thread_rng().gen_range(0..=max_pos)
-            } else {
-                0
-            };
+                    let max_pos = config.settings.anchor_max_position.min(tracks.len());
+                    let insert_idx = if max_pos > 0 {
+                        rand::thread_rng().gen_range(0..=max_pos)
+                    } else {
+                        0
+                    };
 
-            println!(
-                "  ⚓ Geïnjecteerd op positie #{}: {} - {}",
-                insert_idx + 1,
-                config.settings.anchor_artist,
-                anchor_track.name
-            );
-            tracks.insert(insert_idx, anchor_track);
+                    println!(
+                        "  ⚓ Geïnjecteerd op positie #{}: {} - {}",
+                        insert_idx + 1,
+                        config.settings.anchor_artist,
+                        anchor_track.name
+                    );
+                    tracks.insert(insert_idx, anchor_track);
+                }
+            }
         }
 
         if dry_run {

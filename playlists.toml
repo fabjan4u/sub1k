@@ -35,4 +35,4 @@ genres = [
     "metallic hardcore",
     "slamming deathcore"
 ]
-anchor_track_query = "Paleface Swiss"
+# Geen anchor_track_query = 100% pure obscure tracks (<1.000 streams)

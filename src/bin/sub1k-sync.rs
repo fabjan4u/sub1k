@@ -109,7 +109,8 @@ async fn run_auth(
 
     let creds = match (client_id, client_secret) {
         (Some(id), Some(secret)) => Credentials::new(&id, &secret),
-        _ => get_credentials().context("Geef --client-id en --client-secret mee of zet ze in je .env")?,
+        _ => get_credentials()
+            .context("Geef --client-id en --client-secret mee of zet ze in je .env")?,
     };
 
     let oauth = OAuth {
@@ -299,18 +300,31 @@ async fn run_sync(config_path: &str, dry_run: bool) -> Result<()> {
 
     let mut summary_lines = Vec::new();
     summary_lines.push(format!("# 📻 Sub-1K Auto-Curator Sync Report"));
-    summary_lines.push(format!("**Anchor Artist:** `{}`\n", config.settings.anchor_artist));
+    summary_lines.push(format!(
+        "**Anchor Artist:** `{}`\n",
+        config.settings.anchor_artist
+    ));
 
     for pl in &config.playlists {
         println!("\n📂 Playlist: {} ({})", pl.name, pl.spotify_playlist_id);
 
         if pl.spotify_playlist_id.starts_with("YOUR_PLAYLIST_ID") {
-            println!("  ⚠️ Sla over: playlist ID is nog niet geconfigureerd in {}", config_path);
+            println!(
+                "  ⚠️ Sla over: playlist ID is nog niet geconfigureerd in {}",
+                config_path
+            );
             continue;
         }
 
-        println!("  🔍 Graven naar tracks met populariteit <= {}...", config.settings.max_popularity);
-        let has_anchor = pl.anchor_track_query.as_ref().map(|q| !q.trim().is_empty()).unwrap_or(false);
+        println!(
+            "  🔍 Graven naar tracks met populariteit <= {}...",
+            config.settings.max_popularity
+        );
+        let has_anchor = pl
+            .anchor_track_query
+            .as_ref()
+            .map(|q| !q.trim().is_empty())
+            .unwrap_or(false);
         let target_harvest = if has_anchor {
             config.settings.playlist_size.saturating_sub(1)
         } else {
@@ -379,16 +393,13 @@ async fn run_sync(config_path: &str, dry_run: bool) -> Result<()> {
         );
 
         let _ = spotify
-            .playlist_change_detail(
-                playlist_id,
-                None,
-                None,
-                Some(&description),
-                None,
-            )
+            .playlist_change_detail(playlist_id, None, None, Some(&description), None)
             .await;
 
-        println!("  ✅ Playlist succesvol bijgewerkt ({} nummers).", tracks.len());
+        println!(
+            "  ✅ Playlist succesvol bijgewerkt ({} nummers).",
+            tracks.len()
+        );
 
         summary_lines.push(format!("### {}", pl.name));
         summary_lines.push(format!("Bijgewerkt met **{}** tracks.", tracks.len()));
@@ -401,7 +412,10 @@ async fn run_sync(config_path: &str, dry_run: bool) -> Result<()> {
 
         if let Some(target_url) = webhook_url {
             if !target_url.is_empty() && !dry_run {
-                println!("  📡 Verzenden van sync-notificatie naar webhook: {}", target_url);
+                println!(
+                    "  📡 Verzenden van sync-notificatie naar webhook: {}",
+                    target_url
+                );
 
                 let artist_names: Vec<String> = tracks
                     .iter()

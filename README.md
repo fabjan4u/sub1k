@@ -1,19 +1,51 @@
 # Sub-1K Radio (`sub1k`)
 
 [![Crates.io](https://img.shields.io/crates/v/sub1k.svg)](https://crates.io/crates/sub1k)
+[![GitHub release (latest by date)](https://img.shields.io/github/v/release/fabjan4u/sub1k?label=release)](https://github.com/fabjan4u/sub1k/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build & Test](https://github.com/fabjan4u/sub1k/actions/workflows/ci.yml/badge.svg)](https://github.com/fabjan4u/sub1k/actions)
 
-> A terminal player designed to rescue indie tracks from Spotify's <1000 stream demonetization threshold.
+> **A terminal player and crate digger designed to rescue indie tracks from Spotify's <1,000 stream annual demonetization threshold.**
 
 ---
 
 ## ⚡ Quick Install
 
+Pick the method that fits your workflow best:
+
+### Option 1: Direct Binary Download (No Rust or compiler required)
+
+Download the latest pre-compiled binary directly from [**GitHub Releases**](https://github.com/fabjan4u/sub1k/releases/latest):
+
+| Operating System | Architecture | Package | Download |
+| :--- | :--- | :--- | :--- |
+| 🐧 **Linux** | `x86_64` | `.tar.gz` | [**Download for Linux**](https://github.com/fabjan4u/sub1k/releases/latest/download/sub1k-linux-x86_64.tar.gz) |
+| 🪟 **Windows** | `x86_64` | `.zip` (includes `sub1k.exe`) | [**Download for Windows**](https://github.com/fabjan4u/sub1k/releases/latest/download/sub1k-windows-x86_64.zip) |
+| 🍏 **macOS** | Apple Silicon (`arm64` / M1/M2/M3/M4) | `.tar.gz` | [**Download for macOS (Apple Silicon)**](https://github.com/fabjan4u/sub1k/releases/latest/download/sub1k-macos-arm64.tar.gz) |
+
+> **Quick one-liner on Linux:**
+> ```bash
+> curl -sL https://github.com/fabjan4u/sub1k/releases/latest/download/sub1k-linux-x86_64.tar.gz | tar -xz && sudo mv sub1k /usr/local/bin/
+> ```
+
+---
+
+### Option 2: Via Cargo / Crates.io (If you have Rust installed)
+
 ```bash
 cargo install sub1k
 ```
-*(Or download pre-built binaries for Linux, macOS and Windows from [Releases](https://github.com/fabjan4u/sub1k/releases))*
+
+---
+
+### Option 3: Build from source
+
+```bash
+git clone https://github.com/fabjan4u/sub1k.git
+cd sub1k
+cargo build --release
+./target/release/sub1k
+```
 
 ---
 

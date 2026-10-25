@@ -23,3 +23,16 @@ name = "Dark Electronic & Industrial Underdogs [<1K Streams]"
 spotify_playlist_id = "1kmZVpw99RovDgeLYfHoPa"
 genres = ["darksynth", "industrial", "ebm", "cyberpunk"]
 anchor_track_query = "artist:\"THE SILICON RITE\""
+
+[[playlists]]
+name = "Heavy Deathcore & Beatdown Underdogs [<1K Streams]"
+spotify_playlist_id = "66cUj6IKJvO6UG12bhHxFb"
+genres = [
+    "deathcore",
+    "beatdown",
+    "slam deathcore",
+    "downtempo deathcore",
+    "metallic hardcore",
+    "slamming deathcore"
+]
+anchor_track_query = "Paleface Swiss"

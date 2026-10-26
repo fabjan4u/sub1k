@@ -1,0 +1,48 @@
+name: "🎸 Submit a Band (<1K Streams)"
+description: "Submit an underground band or track (<1,000 streams) for daily radio rotation."
+title: "[BAND]: <Artist / Track Name>"
+labels: ["band-submission", "community-radar"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping rescue underdog music from Spotify's $0 demonetization policy!
+        Please ensure the track currently has **under 1,000 streams** on Spotify.
+  - type: input
+    id: artist_name
+    attributes:
+      label: Artist / Band Name
+      placeholder: "e.g. Neon Void"
+    validations:
+      required: true
+  - type: input
+    id: track_name
+    attributes:
+      label: Track Title
+      placeholder: "e.g. Digital Decay"
+    validations:
+      required: true
+  - type: input
+    id: spotify_url
+    attributes:
+      label: Spotify Track or Artist Link
+      placeholder: "https://open.spotify.com/track/..."
+    validations:
+      required: true
+  - type: dropdown
+    id: target_playlist
+    attributes:
+      label: Best Fitting Playlist / Genre
+      options:
+        - "Dark Electronic & Industrial (Darksynth / EBM / Cyberpunk)"
+        - "Heavy Deathcore & Beatdown (Slam / Downtempo / Metalcore)"
+        - "Other / Needs New Playlist"
+    validations:
+      required: true
+  - type: textarea
+    id: notes
+    attributes:
+      label: Extra Notes / Socials
+      placeholder: "Tell us a bit about your project, social links (Bluesky, IG), or why this track belongs on Sub-1K."
+    validations:
+      required: false

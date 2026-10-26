@@ -1,0 +1,38 @@
+name: "📡 Request a New Station / Genre Playlist"
+description: "Suggest a new underground genre or playlist to add to Sub-1K's daily automated rotation."
+title: "[PLAYLIST]: <Genre / Playlist Theme Name>"
+labels: ["playlist-request", "new-station"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        We want to expand Sub-1K across all underground subcultures!
+        Suggest a genre that deserves automated daily underdog curation.
+  - type: input
+    id: genre_name
+    attributes:
+      label: Underground Genre / Playlist Theme
+      placeholder: "e.g. Witch House, Cybergrind, Dark Ambient, Post-Punk, Dungeon Synth"
+    validations:
+      required: true
+  - type: textarea
+    id: sample_artists
+    attributes:
+      label: 3-5 Example Underdog Artists / Tracks (<1K Streams)
+      placeholder: "Give us a few artists or tracks in this genre that exemplify the sound:"
+    validations:
+      required: true
+  - type: input
+    id: spotify_genres
+    attributes:
+      label: Spotify Search Tags / Subgenres
+      placeholder: "e.g. witch house, occult wave, dark wave"
+    validations:
+      required: false
+  - type: textarea
+    id: why_it_matters
+    attributes:
+      label: Why does this scene need a Sub-1K playlist?
+      placeholder: "Tell us about the community, scene, or why artists in this subgenre are overlooked."
+    validations:
+      required: false

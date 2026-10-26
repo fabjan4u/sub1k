@@ -182,3 +182,87 @@ function escapeHtml(str) {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 }
+
+// Modal Handlers
+function openModal(type) {
+  const modal = document.getElementById('request-modal');
+  const bandView = document.getElementById('modal-band-view');
+  const playlistView = document.getElementById('modal-playlist-view');
+
+  if (type === 'band') {
+    bandView.style.display = 'block';
+    playlistView.style.display = 'none';
+  } else {
+    bandView.style.display = 'none';
+    playlistView.style.display = 'block';
+  }
+
+  modal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  const modal = document.getElementById('request-modal');
+  modal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+function closeModalOnBackdrop(e) {
+  if (e.target.id === 'request-modal') {
+    closeModal();
+  }
+}
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    closeModal();
+  }
+});
+
+function submitBand(e) {
+  e.preventDefault();
+  const artist = document.getElementById('band-artist').value.trim();
+  const track = document.getElementById('band-track').value.trim();
+  const url = document.getElementById('band-url').value.trim();
+  const genre = document.getElementById('band-genre').value;
+  const notes = document.getElementById('band-notes').value.trim();
+
+  const title = encodeURIComponent(`[BAND]: ${artist} - ${track}`);
+  const bodyContent = `### 🎸 Band / Artist Submission (<1,000 Streams)
+
+- **Artist / Band:** ${artist}
+- **Track Title:** ${track}
+- **Spotify Link:** ${url}
+- **Target Genre / Station:** ${genre}
+- **Notes / Socials:** ${notes || 'N/A'}
+
+*Submitted via Sub-1K Radio Portal*`;
+
+  const issueUrl = `https://github.com/fabjan4u/sub1k/issues/new?title=${title}&body=${encodeURIComponent(bodyContent)}&labels=band-submission,community-radar`;
+  window.open(issueUrl, '_blank');
+  closeModal();
+}
+
+function submitPlaylist(e) {
+  e.preventDefault();
+  const genre = document.getElementById('pl-genre').value.trim();
+  const artists = document.getElementById('pl-artists').value.trim();
+  const tags = document.getElementById('pl-tags').value.trim();
+  const why = document.getElementById('pl-why').value.trim();
+
+  const title = encodeURIComponent(`[PLAYLIST]: ${genre}`);
+  const bodyContent = `### 📡 New Station / Genre Request
+
+- **Underground Genre:** ${genre}
+- **Example Underdog Artists (<1K Streams):**
+${artists}
+
+- **Spotify Genre Search Tags:** ${tags || 'N/A'}
+- **Why this scene needs a Sub-1K Station:** ${why || 'N/A'}
+
+*Submitted via Sub-1K Radio Portal*`;
+
+  const issueUrl = `https://github.com/fabjan4u/sub1k/issues/new?title=${title}&body=${encodeURIComponent(bodyContent)}&labels=playlist-request,new-station`;
+  window.open(issueUrl, '_blank');
+  closeModal();
+}

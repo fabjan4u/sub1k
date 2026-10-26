@@ -10,7 +10,11 @@ use rspotify::{
     scopes, AuthCodeSpotify, Config, Credentials, OAuth, Token,
 };
 use serde::{Deserialize, Serialize};
-use std::{collections::HashSet, env, fs, path::Path};
+use std::{
+    collections::{HashMap, HashSet},
+    env, fs,
+    path::Path,
+};
 
 #[derive(Parser, Debug)]
 #[command(name = "sub1k-sync")]
@@ -262,58 +266,150 @@ async fn fetch_anchor_track(spotify: &AuthCodeSpotify, query: &str) -> Result<Op
     Ok(None)
 }
 
-/// Graaft obscure underground tracks op voor de opgegeven genres
+/// Filtert spam, lo-fi study beats, ASMR en niet-relevante compilaties eruit
+fn is_clean_underdog_track(track: &FullTrack) -> bool {
+    let blocked_terms = [
+        "lofi",
+        "lo-fi",
+        "study beats",
+        "sleep",
+        "meditation",
+        "relaxing",
+        "bdsm",
+        "erotic",
+        "karaoke",
+        "ringtone",
+        "8-bit",
+        "chiptune",
+        "tribute to",
+        "made famous by",
+        "white noise",
+        "rain sounds",
+        "asmr",
+        "lullaby",
+        "yoga",
+    ];
+
+    let title_lower = track.name.to_lowercase();
+    let album_lower = track.album.name.to_lowercase();
+    let artist_lower = track
+        .artists
+        .first()
+        .map(|a| a.name.to_lowercase())
+        .unwrap_or_default();
+
+    for term in &blocked_terms {
+        if title_lower.contains(term) || album_lower.contains(term) || artist_lower.contains(term) {
+            return false;
+        }
+    }
+
+    // Filter ook losse intro/skit tracks onder 45 seconden eruit
+    if track.duration.num_seconds() < 45 {
+        return false;
+    }
+
+    true
+}
+
+/// Graaft obscure underground tracks (<1K streams via `tag:hipster`) op voor de opgegeven genres.
+/// Gebruikt strikte `genre:"..." tag:hipster` queries met dynamische offsets op basis van Spotify's
+/// werkelijke `page.total`, zodat we nooit terugvallen op ongerelateerde populaire tracks.
 async fn harvest_underdog_tracks(
     spotify: &AuthCodeSpotify,
     genres: &[String],
     max_pop: u32,
     target_count: usize,
+    exclude_artist: Option<&str>,
 ) -> Result<Vec<FullTrack>> {
     let mut tracks = Vec::new();
     let mut seen_artists = HashSet::new();
+    let mut seen_track_ids = HashSet::new();
+    let mut genre_totals: HashMap<String, u32> = HashMap::new();
     let alphabet: Vec<char> = ('a'..='z').collect();
 
+    if let Some(ex) = exclude_artist {
+        seen_artists.insert(ex.to_lowercase());
+    }
+
     let mut attempts = 0;
-    while tracks.len() < target_count && attempts < 40 {
-        attempts += 1;
+    let max_attempts = 75;
+    let mut skip_spins = 0;
+
+    while tracks.len() < target_count && attempts < max_attempts && skip_spins < 300 {
         let genre = genres.choose(&mut rand::thread_rng()).unwrap();
-        let letter = alphabet.choose(&mut rand::thread_rng()).unwrap();
-        let random_offset = rand::thread_rng().gen_range(0..20);
 
-        let queries = [
-            format!("genre:\"{}\" tag:hipster {}*", genre, letter),
-            format!("\"{}\" tag:hipster {}*", genre, letter),
-            format!("\"{}\" tag:hipster", genre),
-            format!("genre:\"{}\" tag:hipster", genre),
-            format!("\"{}\" {}*", genre, letter),
-        ];
-
-        let mut batch_tracks = Vec::new();
-        for query in &queries {
-            let res = spotify
-                .search(
-                    query,
-                    SearchType::Track,
-                    None,
-                    None,
-                    Some(10), // Spotify Web API ondersteunt betrouwbaar 10 items
-                    Some(random_offset),
-                )
-                .await;
-
-            if let Ok(SearchResult::Tracks(page)) = res {
-                if !page.items.is_empty() {
-                    batch_tracks = page.items;
-                    break;
+        let (query, offset) = match genre_totals.get(genre) {
+            None => {
+                // Eerste keer dat we dit genre bevragen: haal offset 0 op om `page.total` te leren kennen
+                (format!("genre:\"{}\" tag:hipster", genre), 0)
+            }
+            Some(&0) => {
+                // Dit genre bestaat niet als strikte Spotify genre-tag; gebruik keyword + verplichte tag:hipster
+                let off = rand::thread_rng().gen_range(0..15);
+                (format!("\"{}\" tag:hipster", genre), off)
+            }
+            Some(&total) if total >= 100 => {
+                // Grote pool (>=100 tracks): wissel af tussen random offset en letter-filter binnen genre + tag:hipster
+                if rand::thread_rng().gen_bool(0.45) {
+                    let letter = alphabet.choose(&mut rand::thread_rng()).unwrap();
+                    (format!("genre:\"{}\" tag:hipster {}*", genre, letter), 0)
+                } else {
+                    let off = rand::thread_rng().gen_range(0..90);
+                    (format!("genre:\"{}\" tag:hipster", genre), off)
                 }
             }
+            Some(&total) if total > 10 => {
+                let max_off = total.saturating_sub(5).min(90);
+                let off = rand::thread_rng().gen_range(0..=max_off);
+                (format!("genre:\"{}\" tag:hipster", genre), off)
+            }
+            Some(_) => {
+                // Kleine pool (<= 10 tracks), offset 0 is al opgehaald; sla over zonder API-attempt te verspillen
+                skip_spins += 1;
+                continue;
+            }
+        };
+
+        attempts += 1;
+
+        let res = spotify
+            .search(
+                &query,
+                SearchType::Track,
+                None,
+                None,
+                Some(10), // Spotify Web API ondersteunt max 10 items per call
+                Some(offset),
+            )
+            .await;
+
+        let mut batch_tracks = Vec::new();
+        if let Ok(SearchResult::Tracks(page)) = res {
+            genre_totals.entry(genre.clone()).or_insert(page.total);
+            batch_tracks = page.items;
+        } else {
+            genre_totals.entry(genre.clone()).or_insert(0);
         }
 
+        // Schud de batch zodat we niet telkens dezelfde top-positie uit een kleine pool pakken
+        batch_tracks.shuffle(&mut rand::thread_rng());
+
         for track in batch_tracks {
-            if track.popularity <= max_pop {
+            if track.popularity <= max_pop && is_clean_underdog_track(&track) {
+                let track_id_key = track
+                    .id
+                    .as_ref()
+                    .map(|id| id.id().to_string())
+                    .unwrap_or_else(|| track.name.clone());
+
+                if !seen_track_ids.insert(track_id_key) {
+                    continue;
+                }
+
                 if let Some(first_artist) = track.artists.first() {
-                    // Maximaal 1 track per artiest voor een diverse selectie
-                    if seen_artists.insert(first_artist.name.clone()) {
+                    // Maximaal 1 track per artiest (case-insensitive) voor maximale diversiteit
+                    if seen_artists.insert(first_artist.name.to_lowercase()) {
                         tracks.push(track);
                         if tracks.len() >= target_count {
                             break;
@@ -323,6 +419,9 @@ async fn harvest_underdog_tracks(
             }
         }
     }
+
+    // Schud de uiteindelijke lijst zodat genres mooi door elkaar lopen
+    tracks.shuffle(&mut rand::thread_rng());
 
     Ok(tracks)
 }
@@ -383,11 +482,18 @@ async fn run_sync(config_path: &str, dry_run: bool, archive_dir: &str) -> Result
             config.settings.playlist_size
         };
 
+        let exclude_artist = if has_anchor {
+            Some(config.settings.anchor_artist.as_str())
+        } else {
+            None
+        };
+
         let mut tracks = harvest_underdog_tracks(
             &spotify,
             &pl.genres,
             config.settings.max_popularity,
             target_harvest,
+            exclude_artist,
         )
         .await?;
 
@@ -430,16 +536,14 @@ async fn run_sync(config_path: &str, dry_run: bool, archive_dir: &str) -> Result
                     .unwrap_or_else(|| "Unknown Artist".to_string());
                 let album_name = t.album.name.clone();
                 let album_art = t.album.images.first().map(|img| img.url.clone());
-                let track_id_str = t
-                    .id
-                    .as_ref()
-                    .map(|id| id.id().to_string())
-                    .unwrap_or_default();
-                let spotify_url = t
-                    .external_urls
-                    .get("spotify")
-                    .cloned()
-                    .unwrap_or_else(|| format!("https://open.spotify.com/track/{}", track_id_str));
+                let track_id_str =
+                    t.id.as_ref()
+                        .map(|id| id.id().to_string())
+                        .unwrap_or_default();
+                let spotify_url =
+                    t.external_urls.get("spotify").cloned().unwrap_or_else(|| {
+                        format!("https://open.spotify.com/track/{}", track_id_str)
+                    });
 
                 ArchivedTrack {
                     id: track_id_str,
@@ -463,7 +567,10 @@ async fn run_sync(config_path: &str, dry_run: bool, archive_dir: &str) -> Result
         playlists_meta.push(PlaylistMeta {
             id: pl.spotify_playlist_id.clone(),
             name: pl.name.clone(),
-            spotify_url: format!("https://open.spotify.com/playlist/{}", pl.spotify_playlist_id),
+            spotify_url: format!(
+                "https://open.spotify.com/playlist/{}",
+                pl.spotify_playlist_id
+            ),
             genres: pl.genres.clone(),
             has_anchor,
             track_count: tracks.len(),
@@ -538,12 +645,18 @@ async fn run_sync(config_path: &str, dry_run: bool, archive_dir: &str) -> Result
                     pl.spotify_playlist_id
                 );
 
+                let payload_anchor_artist = if has_anchor {
+                    config.settings.anchor_artist.as_str()
+                } else {
+                    ""
+                };
+
                 let payload = serde_json::json!({
                     "event": "playlist_updated",
                     "playlist_name": pl.name,
                     "playlist_id": pl.spotify_playlist_id,
                     "playlist_url": format!("https://open.spotify.com/playlist/{}", pl.spotify_playlist_id),
-                    "anchor_artist": config.settings.anchor_artist,
+                    "anchor_artist": payload_anchor_artist,
                     "anchor_track": anchor_track_name,
                     "total_tracks": tracks.len(),
                     "artists": artist_names,

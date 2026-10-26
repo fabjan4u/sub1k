@@ -108,7 +108,7 @@ async function renderTracks() {
     const coverUrl = track.album_art || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="44" height="44"><rect width="44" height="44" fill="%23181d28"/></svg>';
     const isAnchor = track.artist === (latestData ? latestData.anchor_artist : 'THE SILICON RITE');
     const badgeHtml = isAnchor ? '<span class="artist-anchor-badge">CURATOR / ANCHOR</span>' : '';
-    const popDisplay = track.popularity !== undefined ? track.popularity : 0;
+    const tierDisplay = isAnchor ? '⚓ Anchor' : '&lt; 1K Streams';
     
     // Clean playlist name badge
     const isDark = track.playlist_id === '1kmZVpw99RovDgeLYfHoPa';
@@ -133,7 +133,7 @@ async function renderTracks() {
         <td>
           <span class="pop-indicator">
             <span class="pulse-dot" style="width: 6px; height: 6px; background-color: var(--accent-green);"></span>
-            ${popDisplay} / 100
+            ${tierDisplay}
           </span>
         </td>
         <td>

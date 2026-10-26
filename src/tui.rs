@@ -156,13 +156,9 @@ pub async fn run_tui(config: AppConfig) -> Result<()> {
                                 match key.code {
                                     KeyCode::Char('q') => {
                                         app.should_quit = true;
-                                        let _ = action_tx.send(Action::Quit).await;
-                                        tokio::time::sleep(Duration::from_millis(250)).await;
                                     }
                                     KeyCode::Char('c') if key.modifiers.contains(KeyModifiers::CONTROL) => {
                                         app.should_quit = true;
-                                        let _ = action_tx.send(Action::Quit).await;
-                                        tokio::time::sleep(Duration::from_millis(250)).await;
                                     }
                                     KeyCode::Char(' ') => {
                                         let _ = action_tx.send(Action::PlayPause).await;
@@ -209,7 +205,12 @@ pub async fn run_tui(config: AppConfig) -> Result<()> {
                                         app.boost_mode = !app.boost_mode;
                                         app.reset_boost_jitter();
                                         if app.boost_mode {
-                                            app.set_status(format!("⚡ Smart Boost geactiveerd! (Skip tussen 35-45s)"));
+                                            let min_s = app.config.boost_min_seconds.max(35);
+                                            let max_s = app.config.boost_max_seconds.max(min_s);
+                                            app.set_status(format!(
+                                                "⚡ Smart Boost geactiveerd! (Skip na {}-{}s)",
+                                                min_s, max_s
+                                            ));
                                         } else {
                                             app.set_status("Smart Boost gedeactiveerd.");
                                         }

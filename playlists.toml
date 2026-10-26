@@ -14,14 +14,30 @@ anchor_artist = "THE SILICON RITE"
 # Maximum position in playlist to inject the anchor track (0-indexed: 0..=4 means top 5)
 anchor_max_position = 4
 
-# Optional: Webhook URL (e.g. n8n on Oracle VPS) to automatically post updates to X / Discord
+# Optional: Webhook URL (e.g. n8n on Oracle VPS) to automatically post updates to Bluesky / Discord
 # Can also be provided via N8N_WEBHOOK_URL environment variable / GitHub Secret
-# webhook_url = "http://152.70.55.9:5678/webhook/spotify-sync"
+# webhook_url = "https://n8n.cras-cloud.duckdns.org/webhook/spotify-sync"
 
 [[playlists]]
 name = "Dark Electronic & Industrial Underdogs [<1K Streams]"
 spotify_playlist_id = "1kmZVpw99RovDgeLYfHoPa"
-genres = ["darksynth", "industrial", "ebm", "cyberpunk"]
+genres = [
+    "darksynth",
+    "industrial",
+    "ebm",
+    "cyberpunk",
+    "electro-industrial",
+    "dark electro",
+    "aggrotech",
+    "futurepop",
+    "darkwave",
+    "power noise",
+    "industrial metal",
+    "digital hardcore",
+    "cyber metal",
+    "minimal synth",
+    "new beat"
+]
 anchor_track_query = "artist:\"THE SILICON RITE\""
 
 [[playlists]]
@@ -31,8 +47,18 @@ genres = [
     "deathcore",
     "beatdown",
     "slam deathcore",
-    "downtempo deathcore",
     "metallic hardcore",
-    "slamming deathcore"
+    "blackened deathcore",
+    "technical deathcore",
+    "uk beatdown",
+    "nyhc",
+    "brutal death metal",
+    "death metal",
+    "metalcore",
+    "hardcore",
+    "hardcore punk",
+    "mathcore",
+    "sludgecore",
+    "grindcore"
 ]
 # Geen anchor_track_query = 100% pure obscure tracks (<1.000 streams)

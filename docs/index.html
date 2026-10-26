@@ -10,7 +10,7 @@
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700;800&family=Outfit:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   
   <link rel="stylesheet" href="style.css">
 </head>
@@ -31,10 +31,11 @@
         <a href="#mission" class="nav-link">The Mission</a>
         <a href="#playlists" class="nav-link">Live Stations</a>
         <a href="#archive" class="nav-link">Track Archive</a>
-        <a href="#community" class="nav-link nav-highlight">Submit & Request ✦</a>
+        <a href="#community" class="nav-link nav-highlight">Community Radar ✦</a>
+        <a href="#downloads" class="nav-link">Downloads</a>
         <a href="https://github.com/fabjan4u/sub1k" target="_blank" rel="noopener" class="btn btn-sm btn-ghost">
           <svg class="icon" viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/></svg>
-          GitHub Stars
+          ★ Star on GitHub
         </a>
       </nav>
     </div>
@@ -45,25 +46,25 @@
     <div class="container hero-inner">
       <div class="badge-wrapper">
         <span class="badge pulse-badge">
-          <span class="pulse-dot"></span> DAILY RADAR ACTIVE // UPDATES 04:00 UTC
+          <span class="pulse-dot"></span> DAILY RADAR ACTIVE // 04:00 UTC ROTATION
         </span>
       </div>
       <h1 class="hero-title">
         RESCUING THE <span class="gradient-text">UNDERDOGS</span> FROM SPOTIFY'S $0 PURGE.
       </h1>
       <p class="hero-subtitle">
-        Spotify pays <strong>$0 royalties</strong> to tracks under 1,000 streams. We built an automated, open-source daily radio system that scours the deepest corners of the crate and rotates obscure gems straight to ears.
+        Spotify pays <strong>$0 royalties</strong> to tracks under 1,000 streams. We built an automated, open-source daily radio system that scours the deepest corners of the crate and rotates obscure gems straight to real listeners.
       </p>
       
       <div class="hero-actions">
         <a href="#playlists" class="btn btn-primary btn-glow">
           <span>🎧 Listen to Live Playlists</span>
         </a>
-        <a href="#archive" class="btn btn-secondary">
-          <span>🔍 Explore Vault Archive</span>
+        <a href="#community" class="btn btn-community-glow">
+          <span>🎸 Request a Band or Playlist</span>
         </a>
-        <a href="#community" class="btn btn-outline-cyan">
-          <span>🎸 Request a Band / Playlist</span>
+        <a href="#downloads" class="btn btn-secondary">
+          <span>⬇ Download Terminal App</span>
         </a>
       </div>
 
@@ -209,7 +210,6 @@
             </tr>
           </thead>
           <tbody id="tracks-body">
-            <!-- Dynamically populated via JS -->
             <tr>
               <td colspan="6" class="loading-state">
                 <span class="loader"></span> Loading underground vault...
@@ -225,125 +225,223 @@
     </div>
   </section>
 
-  <!-- Community Radar: Request a Band & Request a Playlist -->
+  <!-- Community Radar: INLINE REQUESTS (No annoying popup blockers!) -->
   <section id="community" class="section community-section">
     <div class="container">
       <div class="section-header">
         <span class="section-tag">// COMMUNITY RADAR</span>
         <h2 class="section-title">Submit a Band or Request a Playlist</h2>
-        <p class="section-subtitle">Help us grow the underground network. Are you in a band with &lt;1K streams, or does your subculture need a dedicated daily radio station?</p>
+        <p class="section-subtitle">Choose what you want to submit below. Fill in the fields and click submit — directly on the page without popups!</p>
       </div>
 
-      <div class="community-grid">
-        <!-- Request / Submit a Band -->
-        <div class="community-card">
-          <div class="community-badge-tag">FOR MUSICIANS & FANS</div>
-          <div class="community-icon">🎸</div>
-          <h3 class="community-card-title">Request a Band / Track</h3>
-          <p class="community-card-text">
-            Have you released a track with <strong>under 1,000 streams</strong> on Spotify, or know an obscure indie gem that deserves real listeners? Submit it to get queued for daily rotation.
-          </p>
-          <ul class="community-perks">
-            <li>✓ Must have &lt;1,000 streams on Spotify</li>
-            <li>✓ Eligible for daily auto-rotation & Bluesky threads</li>
-            <li>✓ 100% free — artists supporting artists</li>
-          </ul>
-          <button class="btn btn-primary btn-glow w-100" onclick="openModal('band')">
-            <span>🎸 Request / Submit Band</span>
-          </button>
+      <!-- Mode Toggle Switcher -->
+      <div class="community-tab-bar">
+        <button id="tab-btn-band" class="community-tab-btn active" onclick="switchCommunityTab('band')">
+          <span class="tab-icon">🎸</span>
+          <span class="tab-title">Request / Submit a Band</span>
+          <span class="tab-badge">&lt;1K Streams</span>
+        </button>
+        <button id="tab-btn-playlist" class="community-tab-btn" onclick="switchCommunityTab('playlist')">
+          <span class="tab-icon">📡</span>
+          <span class="tab-title">Request a New Playlist</span>
+          <span class="tab-badge">New Subgenre</span>
+        </button>
+      </div>
+
+      <!-- Inline Submission Container -->
+      <div class="community-form-box">
+        
+        <!-- Tab 1: Submit Band Form -->
+        <div id="tab-pane-band" class="community-tab-pane active">
+          <div class="pane-header">
+            <div class="pane-title-group">
+              <span class="panel-badge badge-red">FOR MUSICIANS & UNDERGROUND FANS</span>
+              <h3>🎸 Submit an Underdog Track (&lt;1,000 Streams)</h3>
+              <p>Are you an artist or listener of an obscure gem? Enter details below to submit for daily automated Spotify rotation.</p>
+            </div>
+            <a href="https://github.com/fabjan4u/sub1k/issues/new?template=band_submission.yml" target="_blank" rel="noopener" class="btn btn-sm btn-ghost">
+              Open Direct on GitHub ↗
+            </a>
+          </div>
+
+          <form id="form-band" onsubmit="handleBandSubmit(event)" class="inline-form-grid">
+            <div class="form-row">
+              <div class="form-field">
+                <label for="band-artist">Artist / Band Name <span class="req">*</span></label>
+                <input type="text" id="band-artist" placeholder="e.g. Cyberpunk Unit 01" required />
+              </div>
+              <div class="form-field">
+                <label for="band-track">Track Title <span class="req">*</span></label>
+                <input type="text" id="band-track" placeholder="e.g. Neon Shadows" required />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label for="band-url">Spotify Track Link <span class="req">*</span></label>
+                <input type="url" id="band-url" placeholder="https://open.spotify.com/track/..." required />
+              </div>
+              <div class="form-field">
+                <label for="band-genre">Target Playlist / Vibe <span class="req">*</span></label>
+                <select id="band-genre" required>
+                  <option value="Dark Electronic & Industrial (Darksynth / EBM / Cyberpunk)">Dark Electronic & Industrial Underdogs</option>
+                  <option value="Heavy Deathcore & Beatdown (Slam / Downtempo / Metalcore)">Heavy Deathcore & Beatdown Underdogs</option>
+                  <option value="Other Underground Genre (Needs New Playlist)">Other Underground Subculture</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-field full-width">
+              <label for="band-notes">Extra Notes / Socials (Optional)</label>
+              <textarea id="band-notes" rows="2" placeholder="Tell us about the project, or your Bluesky / Instagram handle..."></textarea>
+            </div>
+
+            <div class="form-submit-row">
+              <button type="submit" class="btn btn-primary btn-glow">
+                <span>🚀 Submit Band to Radar (GitHub Issue)</span>
+              </button>
+              <a id="btn-band-bluesky" href="https://bsky.app/intent/compose?text=%F0%9F%8E%B8%20Sub-1K%20Band%20Submission%3A%20%40fabian2u.bsky.social%20" target="_blank" rel="noopener" class="btn btn-secondary">
+                <span>🦋 Post to @fabian2u on Bluesky</span>
+              </a>
+            </div>
+          </form>
         </div>
 
-        <!-- Request a Playlist -->
-        <div class="community-card">
-          <div class="community-badge-tag badge-tag-blue">FOR SCENES & SUBCULTURES</div>
-          <div class="community-icon">📡</div>
-          <h3 class="community-card-title">Request a New Playlist</h3>
-          <p class="community-card-text">
-            Want a dedicated Sub-1K automated station for your favourite underground genre? Suggest themes like <em>Witch House, Cybergrind, Dungeon Synth, Post-Punk, Dark Ambient</em>, etc.
-          </p>
-          <ul class="community-perks">
-            <li>✓ 50 fresh underdog tracks curated every morning</li>
-            <li>✓ Daily GitHub Actions cron & Bluesky artist roll-calls</li>
-            <li>✓ Added to Sub-1K Radio's official website & feeds</li>
-          </ul>
-          <button class="btn btn-secondary w-100" onclick="openModal('playlist')">
-            <span>📡 Request New Station</span>
-          </button>
+        <!-- Tab 2: Request Playlist Form -->
+        <div id="tab-pane-playlist" class="community-tab-pane">
+          <div class="pane-header">
+            <div class="pane-title-group">
+              <span class="panel-badge badge-blue">FOR SUBCULTURES & SCENES</span>
+              <h3>📡 Request a New Automated Station</h3>
+              <p>Does your favorite underground genre need an automated daily radio? Propose themes like <em>Witch House, Cybergrind, Dungeon Synth, Post-Punk, Dark Ambient</em>.</p>
+            </div>
+            <a href="https://github.com/fabjan4u/sub1k/issues/new?template=playlist_request.yml" target="_blank" rel="noopener" class="btn btn-sm btn-ghost">
+              Open Direct on GitHub ↗
+            </a>
+          </div>
+
+          <form id="form-playlist" onsubmit="handlePlaylistSubmit(event)" class="inline-form-grid">
+            <div class="form-row">
+              <div class="form-field">
+                <label for="pl-genre">Underground Genre / Station Name <span class="req">*</span></label>
+                <input type="text" id="pl-genre" placeholder="e.g. Witch House, Cybergrind, Dungeon Synth" required />
+              </div>
+              <div class="form-field">
+                <label for="pl-tags">Spotify Search Tags (Optional)</label>
+                <input type="text" id="pl-tags" placeholder="e.g. witch house, occult wave, dark wave" />
+              </div>
+            </div>
+
+            <div class="form-field full-width">
+              <label for="pl-artists">3-5 Example Underdog Artists (&lt;1K Streams) <span class="req">*</span></label>
+              <textarea id="pl-artists" rows="2" placeholder="List a few obscure projects that define this sound..." required></textarea>
+            </div>
+
+            <div class="form-field full-width">
+              <label for="pl-why">Why does this scene need a dedicated Sub-1K playlist? (Optional)</label>
+              <textarea id="pl-why" rows="2" placeholder="Tell us about the community and why artists in this scene are overlooked..."></textarea>
+            </div>
+
+            <div class="form-submit-row">
+              <button type="submit" class="btn btn-primary btn-glow">
+                <span>📡 Propose Station (GitHub Issue)</span>
+              </button>
+              <a id="btn-pl-bluesky" href="https://bsky.app/intent/compose?text=%F0%9F%93%A1%20Sub-1K%20Playlist%20Request%3A%20%40fabian2u.bsky.social%20" target="_blank" rel="noopener" class="btn btn-secondary">
+                <span>🦋 Tweet Proposal on Bluesky</span>
+              </a>
+            </div>
+          </form>
         </div>
+
       </div>
     </div>
   </section>
 
-  <!-- Terminal TUI & GitHub Banner -->
-  <section class="section terminal-promo">
-    <div class="container promo-box">
-      <div class="promo-text">
-        <span class="section-tag">// FOR HACKERS & MUSIC ENTHUSIASTS</span>
-        <h2>Run Your Own Terminal Radio</h2>
-        <p>
-          Prefer listening from your terminal? The <code>sub1k</code> TUI features live audio gauges, keyboard shortcuts, Smart Boost auto-skipping, and local impact tracking.
+  <!-- Dedicated Downloads Section -->
+  <section id="downloads" class="section downloads-section">
+    <div class="container">
+      <div class="section-header">
+        <span class="section-tag">// STANDALONE PRE-BUILT RELEASES</span>
+        <h2 class="section-title">Download Sub-1K Terminal Player</h2>
+        <p class="section-subtitle">
+          No compiler or Rust setup required. Download the pre-built standalone binary for your OS, or install with one terminal command.
         </p>
-        <div class="code-block">
-          <code>cargo install sub1k && sub1k</code>
-        </div>
-        <div class="promo-buttons">
-          <a href="https://github.com/fabjan4u/sub1k" target="_blank" rel="noopener" class="btn btn-primary">
-            ★ Star on GitHub
+      </div>
+
+      <div class="downloads-showcase">
+        <!-- Linux Card -->
+        <div class="os-card">
+          <div class="os-card-top">
+            <div class="os-icon-box">🐧</div>
+            <div class="os-meta">
+              <h3 class="os-name">Linux</h3>
+              <span class="os-spec">x86_64 • GNU / musl</span>
+            </div>
+          </div>
+          <p class="os-desc">Self-contained executable for Ubuntu, Debian, Arch, Fedora, openSUSE & CentOS.</p>
+          <div class="os-pkg-tag">Package: <code>.tar.gz</code></div>
+          <a href="https://github.com/fabjan4u/sub1k/releases/latest/download/sub1k-linux-x86_64.tar.gz" class="btn btn-download">
+            <span>Download for Linux</span>
+            <span class="dl-arrow">⬇</span>
           </a>
-          <a href="https://bsky.app/profile/fabian2u.bsky.social" target="_blank" rel="noopener" class="btn btn-secondary">
-            Follow on Bluesky 🦋
+        </div>
+
+        <!-- Windows Card -->
+        <div class="os-card os-card-featured">
+          <div class="card-featured-badge">POPULAR</div>
+          <div class="os-card-top">
+            <div class="os-icon-box">🪟</div>
+            <div class="os-meta">
+              <h3 class="os-name">Windows</h3>
+              <span class="os-spec">x86_64 • Windows 10 & 11</span>
+            </div>
+          </div>
+          <p class="os-desc">Pre-compiled <code>sub1k.exe</code> packaged in a zip archive. Ready to run in Windows Terminal.</p>
+          <div class="os-pkg-tag">Package: <code>.zip (sub1k.exe)</code></div>
+          <a href="https://github.com/fabjan4u/sub1k/releases/latest/download/sub1k-windows-x86_64.zip" class="btn btn-download btn-download-glow">
+            <span>Download for Windows</span>
+            <span class="dl-arrow">⬇</span>
+          </a>
+        </div>
+
+        <!-- macOS Card -->
+        <div class="os-card">
+          <div class="os-card-top">
+            <div class="os-icon-box">🍏</div>
+            <div class="os-meta">
+              <h3 class="os-name">macOS</h3>
+              <span class="os-spec">Apple Silicon • arm64 (M1-M4)</span>
+            </div>
+          </div>
+          <p class="os-desc">Optimized for Apple Silicon chips. High-performance terminal audio and Spotify Connect.</p>
+          <div class="os-pkg-tag">Package: <code>.tar.gz</code></div>
+          <a href="https://github.com/fabjan4u/sub1k/releases/latest/download/sub1k-macos-arm64.tar.gz" class="btn btn-download">
+            <span>Download for macOS</span>
+            <span class="dl-arrow">⬇</span>
           </a>
         </div>
       </div>
 
-      <!-- Downloads Section -->
-      <div class="downloads-wrapper">
-        <div class="downloads-header">
-          <span class="section-tag">// STANDALONE PRE-BUILT BINARIES</span>
-          <h3>Direct Downloads (No Rust Required)</h3>
-          <p>Pick your platform below to grab the standalone executable:</p>
-        </div>
-        <div class="downloads-grid">
-          <!-- Linux -->
-          <div class="download-card">
-            <div class="dl-os-icon">🐧</div>
-            <div class="dl-details">
-              <span class="dl-os-name">Linux</span>
-              <span class="dl-arch">x86_64 • .tar.gz</span>
-            </div>
-            <a href="https://github.com/fabjan4u/sub1k/releases/latest/download/sub1k-linux-x86_64.tar.gz" class="btn btn-sm btn-download">
-              Download Linux ⬇
-            </a>
+      <!-- Quick One-Liner Box -->
+      <div class="terminal-quickstart-card">
+        <div class="tqc-header">
+          <div class="tqc-dots">
+            <span class="dot dot-red"></span>
+            <span class="dot dot-yellow"></span>
+            <span class="dot dot-green"></span>
           </div>
+          <span class="tqc-title">Quick Install Command (Linux & macOS)</span>
+        </div>
+        <div class="tqc-code">
+          <code>curl -sL https://github.com/fabjan4u/sub1k/releases/latest/download/sub1k-linux-x86_64.tar.gz | tar -xz && sudo mv sub1k /usr/local/bin/</code>
+          <button class="copy-btn" onclick="copyInstallCmd(this)">Copy</button>
+        </div>
+      </div>
 
-          <!-- Windows -->
-          <div class="download-card">
-            <div class="dl-os-icon">🪟</div>
-            <div class="dl-details">
-              <span class="dl-os-name">Windows</span>
-              <span class="dl-arch">x86_64 • .zip (sub1k.exe)</span>
-            </div>
-            <a href="https://github.com/fabjan4u/sub1k/releases/latest/download/sub1k-windows-x86_64.zip" class="btn btn-sm btn-download">
-              Download Windows ⬇
-            </a>
-          </div>
-
-          <!-- macOS -->
-          <div class="download-card">
-            <div class="dl-os-icon">🍏</div>
-            <div class="dl-details">
-              <span class="dl-os-name">macOS</span>
-              <span class="dl-arch">Apple Silicon (arm64 / M1-M4)</span>
-            </div>
-            <a href="https://github.com/fabjan4u/sub1k/releases/latest/download/sub1k-macos-arm64.tar.gz" class="btn btn-sm btn-download">
-              Download macOS ⬇
-            </a>
-          </div>
-        </div>
-        <div class="quick-install-box">
-          <span class="quick-install-label">Quick Linux One-Liner:</span>
-          <code>curl -sL https://github.com/fabjan4u/sub1k/releases/latest/download/sub1k-linux-x86_64.tar.gz | tar -xz &amp;&amp; sudo mv sub1k /usr/local/bin/</code>
-        </div>
+      <!-- Cargo Install Alternative -->
+      <div class="cargo-subtext">
+        <span>Have Rust installed?</span>
+        <code>cargo install sub1k</code>
       </div>
     </div>
   </section>
@@ -363,92 +461,6 @@
       </div>
     </div>
   </footer>
-
-  <!-- Modal for Request a Band / Request a Playlist -->
-  <div id="request-modal" class="modal-backdrop" onclick="closeModalOnBackdrop(event)">
-    <div class="modal-container">
-      <button class="modal-close" onclick="closeModal()">&times;</button>
-      
-      <!-- Band Form -->
-      <div id="modal-band-view" class="modal-view">
-        <div class="modal-header">
-          <span class="section-tag">// ARTIST RADAR</span>
-          <h3 class="modal-title">🎸 Submit / Request a Band</h3>
-          <p class="modal-desc">Submit your own project or an underdog artist (<1,000 streams) for daily radio rotation.</p>
-        </div>
-        <form id="form-band" onsubmit="submitBand(event)">
-          <div class="form-group">
-            <label>Artist / Band Name *</label>
-            <input type="text" id="band-artist" placeholder="e.g. Cyberpunk Unit 01" required />
-          </div>
-          <div class="form-group">
-            <label>Track Name *</label>
-            <input type="text" id="band-track" placeholder="e.g. Neon Shadows" required />
-          </div>
-          <div class="form-group">
-            <label>Spotify Track Link *</label>
-            <input type="url" id="band-url" placeholder="https://open.spotify.com/track/..." required />
-          </div>
-          <div class="form-group">
-            <label>Target Station / Subgenre *</label>
-            <select id="band-genre" required>
-              <option value="Dark Electronic & Industrial (Darksynth / EBM / Cyberpunk)">Dark Electronic & Industrial (Darksynth / EBM / Cyberpunk)</option>
-              <option value="Heavy Deathcore & Beatdown (Slam / Downtempo / Metalcore)">Heavy Deathcore & Beatdown (Slam / Downtempo / Metalcore)</option>
-              <option value="Other Underground Genre (Suggest New Station)">Other Underground Genre (Suggest New Station)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Extra Notes / Socials (Optional)</label>
-            <textarea id="band-notes" rows="2" placeholder="Tell us about the project, or drop your Bluesky/Instagram handle..."></textarea>
-          </div>
-          <div class="modal-actions">
-            <button type="submit" class="btn btn-primary w-100">
-              Submit via GitHub Issue ↗
-            </button>
-            <a id="band-bsky-btn" href="https://bsky.app/intent/compose?text=%F0%9F%8E%B8%20Sub-1K%20Band%20Submission%3A%20%40fabian2u.bsky.social%20" target="_blank" rel="noopener" class="btn btn-secondary w-100">
-              Or Tweet on Bluesky 🦋
-            </a>
-          </div>
-        </form>
-      </div>
-
-      <!-- Playlist Form -->
-      <div id="modal-playlist-view" class="modal-view" style="display: none;">
-        <div class="modal-header">
-          <span class="section-tag">// STATION INCUBATOR</span>
-          <h3 class="modal-title">📡 Request a New Station</h3>
-          <p class="modal-desc">Suggest a new subculture or underground music genre for Sub-1K to curate daily.</p>
-        </div>
-        <form id="form-playlist" onsubmit="submitPlaylist(event)">
-          <div class="form-group">
-            <label>Underground Genre / Theme Name *</label>
-            <input type="text" id="pl-genre" placeholder="e.g. Witch House, Cybergrind, Dungeon Synth" required />
-          </div>
-          <div class="form-group">
-            <label>Example Underdog Artists (<1K Streams) *</label>
-            <textarea id="pl-artists" rows="2" placeholder="List 3-5 obscure artists or bands in this style..." required></textarea>
-          </div>
-          <div class="form-group">
-            <label>Spotify Genre Tags (Optional)</label>
-            <input type="text" id="pl-tags" placeholder="e.g. witch house, occult wave, dark wave" />
-          </div>
-          <div class="form-group">
-            <label>Why this scene needs automated curation (Optional)</label>
-            <textarea id="pl-why" rows="2" placeholder="Why should this subgenre get an automated 50-track daily station?"></textarea>
-          </div>
-          <div class="modal-actions">
-            <button type="submit" class="btn btn-primary w-100">
-              Request Station on GitHub ↗
-            </button>
-            <a id="pl-bsky-btn" href="https://bsky.app/intent/compose?text=%F0%9F%93%A1%20Sub-1K%20Playlist%20Request%3A%20%40fabian2u.bsky.social%20" target="_blank" rel="noopener" class="btn btn-secondary w-100">
-              Or Suggest on Bluesky 🦋
-            </a>
-          </div>
-        </form>
-      </div>
-
-    </div>
-  </div>
 
   <script src="app.js"></script>
 </body>

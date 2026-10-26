@@ -6,6 +6,7 @@ let currentSearch = '';
 
 document.addEventListener('DOMContentLoaded', () => {
   initApp();
+  setupCommunityFormSync();
 });
 
 async function initApp() {
@@ -173,53 +174,64 @@ function setupEvents() {
   });
 }
 
-function escapeHtml(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
-}
-
-// Modal Handlers
-function openModal(type) {
-  const modal = document.getElementById('request-modal');
-  const bandView = document.getElementById('modal-band-view');
-  const playlistView = document.getElementById('modal-playlist-view');
+// ==========================================================================
+// Inline Community Radar Tabs & Submission (Direct navigation, no popups!)
+// ==========================================================================
+function switchCommunityTab(type) {
+  const btnBand = document.getElementById('tab-btn-band');
+  const btnPl = document.getElementById('tab-btn-playlist');
+  const paneBand = document.getElementById('tab-pane-band');
+  const panePl = document.getElementById('tab-pane-playlist');
 
   if (type === 'band') {
-    bandView.style.display = 'block';
-    playlistView.style.display = 'none';
+    btnBand.classList.add('active');
+    btnPl.classList.remove('active');
+    paneBand.classList.add('active');
+    panePl.classList.remove('active');
   } else {
-    bandView.style.display = 'none';
-    playlistView.style.display = 'block';
-  }
-
-  modal.classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-
-function closeModal() {
-  const modal = document.getElementById('request-modal');
-  modal.classList.remove('open');
-  document.body.style.overflow = '';
-}
-
-function closeModalOnBackdrop(e) {
-  if (e.target.id === 'request-modal') {
-    closeModal();
+    btnPl.classList.add('active');
+    btnBand.classList.remove('active');
+    panePl.classList.add('active');
+    paneBand.classList.remove('active');
   }
 }
 
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    closeModal();
-  }
-});
+function setupCommunityFormSync() {
+  // Live update the Bluesky tweet links as the user types
+  const bandArtist = document.getElementById('band-artist');
+  const bandTrack = document.getElementById('band-track');
+  const bandUrl = document.getElementById('band-url');
+  const bskyBandBtn = document.getElementById('btn-band-bluesky');
 
-function submitBand(e) {
+  function updateBandBsky() {
+    const a = bandArtist ? bandArtist.value.trim() : '';
+    const t = bandTrack ? bandTrack.value.trim() : '';
+    const u = bandUrl ? bandUrl.value.trim() : '';
+    let text = `🎸 Sub-1K Band Submission: @fabian2u.bsky.social\nArtist: ${a || '...'}\nTrack: ${t || '...'}\nLink: ${u || '...'}\n#sub1k #underdog`;
+    if (bskyBandBtn) {
+      bskyBandBtn.href = `https://bsky.app/intent/compose?text=${encodeURIComponent(text)}`;
+    }
+  }
+
+  if (bandArtist) bandArtist.addEventListener('input', updateBandBsky);
+  if (bandTrack) bandTrack.addEventListener('input', updateBandBsky);
+  if (bandUrl) bandUrl.addEventListener('input', updateBandBsky);
+
+  const plGenre = document.getElementById('pl-genre');
+  const bskyPlBtn = document.getElementById('btn-pl-bluesky');
+
+  function updatePlBsky() {
+    const g = plGenre ? plGenre.value.trim() : '';
+    let text = `📡 Sub-1K Station Request: @fabian2u.bsky.social\nProposing new daily radio: "${g || '...'}"\n#sub1k #undergroundmusic`;
+    if (bskyPlBtn) {
+      bskyPlBtn.href = `https://bsky.app/intent/compose?text=${encodeURIComponent(text)}`;
+    }
+  }
+
+  if (plGenre) plGenre.addEventListener('input', updatePlBsky);
+}
+
+function handleBandSubmit(e) {
   e.preventDefault();
   const artist = document.getElementById('band-artist').value.trim();
   const track = document.getElementById('band-track').value.trim();
@@ -236,14 +248,14 @@ function submitBand(e) {
 - **Target Genre / Station:** ${genre}
 - **Notes / Socials:** ${notes || 'N/A'}
 
-*Submitted via Sub-1K Radio Portal*`;
+*Submitted via Sub-1K Radio Community Portal*`;
 
   const issueUrl = `https://github.com/fabjan4u/sub1k/issues/new?title=${title}&body=${encodeURIComponent(bodyContent)}&labels=band-submission,community-radar`;
-  window.open(issueUrl, '_blank');
-  closeModal();
+  // Use direct location navigation on user click so NO popup blocker blocks it
+  window.location.href = issueUrl;
 }
 
-function submitPlaylist(e) {
+function handlePlaylistSubmit(e) {
   e.preventDefault();
   const genre = document.getElementById('pl-genre').value.trim();
   const artists = document.getElementById('pl-artists').value.trim();
@@ -260,9 +272,34 @@ ${artists}
 - **Spotify Genre Search Tags:** ${tags || 'N/A'}
 - **Why this scene needs a Sub-1K Station:** ${why || 'N/A'}
 
-*Submitted via Sub-1K Radio Portal*`;
+*Submitted via Sub-1K Radio Community Portal*`;
 
   const issueUrl = `https://github.com/fabjan4u/sub1k/issues/new?title=${title}&body=${encodeURIComponent(bodyContent)}&labels=playlist-request,new-station`;
-  window.open(issueUrl, '_blank');
-  closeModal();
+  // Direct location navigation
+  window.location.href = issueUrl;
+}
+
+function copyInstallCmd(btn) {
+  const cmd = "curl -sL https://github.com/fabjan4u/sub1k/releases/latest/download/sub1k-linux-x86_64.tar.gz | tar -xz && sudo mv sub1k /usr/local/bin/";
+  navigator.clipboard.writeText(cmd).then(() => {
+    const orig = btn.textContent;
+    btn.textContent = "Copied! ✓";
+    btn.style.backgroundColor = "var(--accent-green)";
+    btn.style.color = "#000";
+    setTimeout(() => {
+      btn.textContent = orig;
+      btn.style.backgroundColor = "";
+      btn.style.color = "";
+    }, 2000);
+  });
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

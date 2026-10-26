@@ -6,9 +6,10 @@ use rand::{seq::SliceRandom, Rng};
 use rspotify::{
     clients::{BaseClient, OAuthClient},
     model::{FullTrack, PlayableId, PlaylistId, SearchResult, SearchType},
+    prelude::Id,
     scopes, AuthCodeSpotify, Config, Credentials, OAuth, Token,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 use std::{collections::HashSet, env, fs, path::Path};
 
 #[derive(Parser, Debug)]
@@ -30,6 +31,10 @@ struct Cli {
     /// Dry run mode: discover tracks and show playlist changes without modifying Spotify
     #[arg(long)]
     dry_run: bool,
+
+    /// Directory to save track archives and website data (e.g. docs/data)
+    #[arg(long, default_value = "docs/data")]
+    archive_dir: String,
 }
 
 #[derive(Subcommand, Debug)]
@@ -58,6 +63,10 @@ enum Commands {
         /// Dry run mode: test harvesting without mutating playlists
         #[arg(long)]
         dry_run: bool,
+
+        /// Directory to save track archives and website data (e.g. docs/data)
+        #[arg(long, default_value = "docs/data")]
+        archive_dir: String,
     },
 }
 
@@ -83,6 +92,42 @@ struct PlaylistConfig {
     spotify_playlist_id: String,
     genres: Vec<String>,
     anchor_track_query: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+struct ArchivedTrack {
+    id: String,
+    title: String,
+    artist: String,
+    album: String,
+    album_art: Option<String>,
+    duration_ms: u64,
+    popularity: u32,
+    spotify_url: String,
+    preview_url: Option<String>,
+    added_at: String,
+    playlist_id: String,
+    playlist_name: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+struct PlaylistMeta {
+    id: String,
+    name: String,
+    spotify_url: String,
+    genres: Vec<String>,
+    has_anchor: bool,
+    track_count: usize,
+    updated_at: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+struct WebsiteState {
+    updated_at: String,
+    anchor_artist: String,
+    playlists: Vec<PlaylistMeta>,
+    latest_tracks: Vec<ArchivedTrack>,
+    total_archived: usize,
 }
 
 /// Helper function to retrieve credentials from env variables
@@ -282,7 +327,7 @@ async fn harvest_underdog_tracks(
     Ok(tracks)
 }
 
-async fn run_sync(config_path: &str, dry_run: bool) -> Result<()> {
+async fn run_sync(config_path: &str, dry_run: bool, archive_dir: &str) -> Result<()> {
     if !Path::new(config_path).exists() {
         anyhow::bail!(
             "Configuratiebestand '{}' niet gevonden. Maak dit bestand aan of kopieer het voorbeeld.",
@@ -298,12 +343,19 @@ async fn run_sync(config_path: &str, dry_run: bool) -> Result<()> {
     println!("⚡ Initialiseren van Spotify headless client...");
     let spotify = get_headless_client().await?;
 
+    let now_utc = chrono::Utc::now();
+    let today = now_utc.format("%Y-%m-%d").to_string();
+    let iso_now = now_utc.to_rfc3339();
+
     let mut summary_lines = Vec::new();
     summary_lines.push(format!("# 📻 Sub-1K Auto-Curator Sync Report"));
     summary_lines.push(format!(
         "**Anchor Artist:** `{}`\n",
         config.settings.anchor_artist
     ));
+
+    let mut all_archived_tracks: Vec<ArchivedTrack> = Vec::new();
+    let mut playlists_meta: Vec<PlaylistMeta> = Vec::new();
 
     for pl in &config.playlists {
         println!("\n📂 Playlist: {} ({})", pl.name, pl.spotify_playlist_id);
@@ -367,6 +419,57 @@ async fn run_sync(config_path: &str, dry_run: bool) -> Result<()> {
             }
         }
 
+        // Archiveer de gevonden tracks voor deze playlist
+        let pl_archived: Vec<ArchivedTrack> = tracks
+            .iter()
+            .map(|t| {
+                let artist_name = t
+                    .artists
+                    .first()
+                    .map(|a| a.name.clone())
+                    .unwrap_or_else(|| "Unknown Artist".to_string());
+                let album_name = t.album.name.clone();
+                let album_art = t.album.images.first().map(|img| img.url.clone());
+                let track_id_str = t
+                    .id
+                    .as_ref()
+                    .map(|id| id.id().to_string())
+                    .unwrap_or_default();
+                let spotify_url = t
+                    .external_urls
+                    .get("spotify")
+                    .cloned()
+                    .unwrap_or_else(|| format!("https://open.spotify.com/track/{}", track_id_str));
+
+                ArchivedTrack {
+                    id: track_id_str,
+                    title: t.name.clone(),
+                    artist: artist_name,
+                    album: album_name,
+                    album_art,
+                    duration_ms: t.duration.num_milliseconds().max(0) as u64,
+                    popularity: t.popularity,
+                    spotify_url,
+                    preview_url: None,
+                    added_at: iso_now.clone(),
+                    playlist_id: pl.spotify_playlist_id.clone(),
+                    playlist_name: pl.name.clone(),
+                }
+            })
+            .collect();
+
+        all_archived_tracks.extend(pl_archived);
+
+        playlists_meta.push(PlaylistMeta {
+            id: pl.spotify_playlist_id.clone(),
+            name: pl.name.clone(),
+            spotify_url: format!("https://open.spotify.com/playlist/{}", pl.spotify_playlist_id),
+            genres: pl.genres.clone(),
+            has_anchor,
+            track_count: tracks.len(),
+            updated_at: iso_now.clone(),
+        });
+
         if dry_run {
             println!("  [DRY RUN] Geen Spotify wijzigingen doorgevoerd.");
             continue;
@@ -386,7 +489,6 @@ async fn run_sync(config_path: &str, dry_run: bool) -> Result<()> {
             .with_context(|| format!("Kon tracks niet vervangen voor playlist {}", pl.name))?;
 
         // Beschrijving bijwerken met datum en open-source credit
-        let today = chrono::Utc::now().format("%Y-%m-%d").to_string();
         let description = format!(
             "Daily underdog discovery ({}). Under 1K streams. Curated by {} // Powered by open-source sub1k-sync",
             today, config.settings.anchor_artist
@@ -465,6 +567,67 @@ async fn run_sync(config_path: &str, dry_run: bool) -> Result<()> {
         }
     }
 
+    // 💾 Wegschrijven naar Archive & Website Data
+    if !all_archived_tracks.is_empty() {
+        let archive_path = Path::new(archive_dir);
+        if let Err(e) = fs::create_dir_all(archive_path) {
+            eprintln!("  ⚠️ Kon archive dir niet aanmaken: {}", e);
+        } else {
+            // 1. Lees bestaande geschiedenis in
+            let history_file = archive_path.join("history.json");
+            let existing_history: Vec<ArchivedTrack> = if history_file.exists() {
+                fs::read_to_string(&history_file)
+                    .ok()
+                    .and_then(|data| serde_json::from_str(&data).ok())
+                    .unwrap_or_default()
+            } else {
+                Vec::new()
+            };
+
+            // Voeg nieuwe toe vooraan (meest recente eerst), zonder duplicaten per playlist
+            let mut seen_ids = HashSet::new();
+            let mut merged_history = Vec::new();
+
+            for track in all_archived_tracks.iter().chain(existing_history.iter()) {
+                let key = format!("{}:{}", track.playlist_id, track.id);
+                if seen_ids.insert(key) {
+                    merged_history.push(track.clone());
+                }
+            }
+
+            // Beperk history eventueel tot laatste 2.500 tracks voor snelle web laadtijd
+            if merged_history.len() > 2500 {
+                merged_history.truncate(2500);
+            }
+
+            let total_count = merged_history.len();
+
+            // Sla history.json op
+            if let Ok(json_str) = serde_json::to_string_pretty(&merged_history) {
+                let _ = fs::write(&history_file, json_str);
+            }
+
+            // 2. Sla latest.json (enkel vandaag) op
+            let latest_file = archive_path.join("latest.json");
+            let site_state = WebsiteState {
+                updated_at: iso_now,
+                anchor_artist: config.settings.anchor_artist.clone(),
+                playlists: playlists_meta,
+                latest_tracks: all_archived_tracks,
+                total_archived: total_count,
+            };
+
+            if let Ok(json_str) = serde_json::to_string_pretty(&site_state) {
+                let _ = fs::write(&latest_file, json_str);
+            }
+
+            println!(
+                "  📁 Archief bijgewerkt in {} (Totaal geregistreerde tracks: {})",
+                archive_dir, total_count
+            );
+        }
+    }
+
     // Schrijf een GitHub Action Step Summary indien beschikbaar
     if let Ok(summary_file) = env::var("GITHUB_STEP_SUMMARY") {
         let content = summary_lines.join("\n");
@@ -486,7 +649,11 @@ async fn main() -> Result<()> {
             client_secret,
             redirect_uri,
         }) => run_auth(client_id, client_secret, redirect_uri).await,
-        Some(Commands::Sync { config, dry_run }) => run_sync(&config, dry_run).await,
-        None => run_sync(&cli.config, cli.dry_run).await,
+        Some(Commands::Sync {
+            config,
+            dry_run,
+            archive_dir,
+        }) => run_sync(&config, dry_run, &archive_dir).await,
+        None => run_sync(&cli.config, cli.dry_run, &cli.archive_dir).await,
     }
 }

@@ -6,6 +6,9 @@ on:
     - cron: '0 4 * * *'
   workflow_dispatch: # Knop in GitHub UI om handmatig direct te testen
 
+permissions:
+  contents: write # Nodig om het archief (docs/data) terug te committen
+
 jobs:
   sync:
     name: Sync Underdog Playlists (<1K Streams)
@@ -21,10 +24,22 @@ jobs:
       - name: Rust Cache
         uses: Swatinem/rust-cache@v2
 
-      - name: Run Sub-1K Playlist Auto-Curator
+      - name: Run Sub-1K Playlist Auto-Curator & Update Archive
         env:
           RSPOTIFY_CLIENT_ID: ${{ secrets.RSPOTIFY_CLIENT_ID }}
           RSPOTIFY_CLIENT_SECRET: ${{ secrets.RSPOTIFY_CLIENT_SECRET }}
           SPOTIFY_REFRESH_TOKEN: ${{ secrets.SPOTIFY_REFRESH_TOKEN }}
           N8N_WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL }}
-        run: cargo run --release --bin sub1k-sync -- sync --config playlists.toml
+        run: cargo run --release --bin sub1k-sync -- sync --config playlists.toml --archive-dir docs/data
+
+      - name: Commit & Push Daily Track Archive
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add docs/data/
+          if git diff --staged --quiet; then
+            echo "Geen nieuwe wijzigingen in archief om te committen."
+          else
+            git commit -m "chore(archive): automated daily underdog vault update [skip ci]"
+            git push origin main
+          fi

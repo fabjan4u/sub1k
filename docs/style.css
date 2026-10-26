@@ -687,6 +687,117 @@ body {
 .promo-buttons {
   display: flex;
   gap: 16px;
+  margin-bottom: 40px;
+}
+
+/* Downloads Section */
+.downloads-wrapper {
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 36px;
+}
+
+.downloads-header h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  margin: 4px 0 8px;
+}
+
+.downloads-header p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 24px;
+}
+
+.downloads-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.download-card {
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 16px;
+  transition: all 0.2s ease;
+}
+
+.download-card:hover {
+  border-color: var(--accent-cyan);
+  transform: translateY(-2px);
+}
+
+.dl-os-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.dl-details {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dl-os-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+.dl-arch {
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  font-family: var(--font-mono);
+}
+
+.btn-download {
+  background-color: var(--bg-card);
+  color: var(--accent-cyan);
+  border: 1px solid rgba(0, 242, 254, 0.3);
+  width: 100%;
+}
+
+.btn-download:hover {
+  background-color: var(--accent-cyan);
+  color: #030812;
+  box-shadow: 0 4px 14px rgba(0, 242, 254, 0.3);
+}
+
+.quick-install-box {
+  background-color: #050608;
+  border: 1px solid var(--border);
+  padding: 12px 18px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.quick-install-label {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--text-dim);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.quick-install-box code {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--accent-green);
+  word-break: break-all;
+}
+
+@media (max-width: 900px) {
+  .downloads-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* Footer */

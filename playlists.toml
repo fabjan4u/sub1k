@@ -11,8 +11,8 @@ playlist_size = 50
 # Name of the anchor/curator artist to highlight
 anchor_artist = "THE SILICON RITE"
 
-# Maximum position in playlist to inject the anchor track (0-indexed: 0..=4 means top 5)
-anchor_max_position = 4
+# Maximum position in playlist to inject the anchor track (0-indexed: 0..=1 means top 2 for maximum retention)
+anchor_max_position = 1
 
 # Optional: Webhook URL (e.g. n8n on Oracle VPS) to automatically post updates to Bluesky / Discord
 # Can also be provided via N8N_WEBHOOK_URL environment variable / GitHub Secret
@@ -21,6 +21,7 @@ anchor_max_position = 4
 [[playlists]]
 name = "Dark Electronic & Industrial Underdogs [<1K Streams]"
 spotify_playlist_id = "1kmZVpw99RovDgeLYfHoPa"
+description = "The darkest underground darksynth, industrial, cyberpunk & EBM under 1,000 streams. Deep focus for coding, gaming & night drives. Curated by THE SILICON RITE. Updated daily."
 genres = [
     "darksynth",
     "industrial",
@@ -43,6 +44,7 @@ anchor_track_query = "artist:\"THE SILICON RITE\""
 [[playlists]]
 name = "Heavy Deathcore & Beatdown Underdogs [<1K Streams]"
 spotify_playlist_id = "66cUj6IKJvO6UG12bhHxFb"
+description = "The heaviest underground deathcore, beatdown, slam & downtempo under 1,000 streams. Brutal breakdowns for heavy gym PRs, lifting & aggression. Updated daily."
 genres = [
     "deathcore",
     "beatdown",

@@ -2,10 +2,19 @@
 
 [![Crates.io](https://img.shields.io/crates/v/sub1k.svg)](https://crates.io/crates/sub1k)
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/fabjan4u/sub1k?label=release)](https://github.com/fabjan4u/sub1k/releases/latest)
+[![Spotify Dark Electronic](https://img.shields.io/badge/Spotify-Dark%20Electronic%20%3C1K-1DB954?style=flat-square&logo=spotify&logoColor=white)](https://open.spotify.com/playlist/1kmZVpw99RovDgeLYfHoPa)
+[![Spotify Heavy Deathcore](https://img.shields.io/badge/Spotify-Heavy%20Deathcore%20%3C1K-1DB954?style=flat-square&logo=spotify&logoColor=white)](https://open.spotify.com/playlist/66cUj6IKJvO6UG12bhHxFb)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build & Test](https://github.com/fabjan4u/sub1k/actions/workflows/ci.yml/badge.svg)](https://github.com/fabjan4u/sub1k/actions)
 
 > **A terminal player and crate digger designed to rescue indie tracks from Spotify's <1,000 stream annual demonetization threshold.**
+
+---
+
+### 🎧 Live Spotify Underdog Radios (Updated Daily)
+Stream the latest daily batch of obscure underground tracks (<1,000 streams) curated by `sub1k-sync`:
+* 🎛️ [**Dark Electronic & Industrial Underdogs (<1K)**](https://open.spotify.com/playlist/1kmZVpw99RovDgeLYfHoPa) — *Darksynth, Cyberpunk, Industrial & EBM for deep coding and night focus.*
+* 🔨 [**Heavy Deathcore & Beatdown Underdogs (<1K)**](https://open.spotify.com/playlist/66cUj6IKJvO6UG12bhHxFb) — *Brutal underground deathcore, beatdown & slam for heavy gym PRs and lifting.*
 
 ---
 

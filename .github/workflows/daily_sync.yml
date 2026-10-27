@@ -2,8 +2,8 @@ name: Daily Spotify Underdog Playlist Refresh
 
 on:
   schedule:
-    # Elke ochtend om 04:00 UTC (06:00 NL tijd)
-    - cron: '0 4 * * *'
+    # Elke ochtend om 05:17 UTC (niet op :00 om GitHub Actions cron-files te vermijden)
+    - cron: '17 5 * * *'
   workflow_dispatch: # Knop in GitHub UI om handmatig direct te testen
 
 permissions:

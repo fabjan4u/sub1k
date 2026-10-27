@@ -96,6 +96,8 @@ struct PlaylistConfig {
     spotify_playlist_id: String,
     genres: Vec<String>,
     anchor_track_query: Option<String>,
+    #[serde(default)]
+    description: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -266,9 +268,9 @@ async fn fetch_anchor_track(spotify: &AuthCodeSpotify, query: &str) -> Result<Op
     Ok(None)
 }
 
-/// Filtert spam, lo-fi study beats, ASMR en niet-relevante compilaties eruit
+/// Filtert spam, lo-fi study beats, ASMR, skits en interludes eruit voor maximaal luisterbehoud (anti-skip)
 fn is_clean_underdog_track(track: &FullTrack) -> bool {
-    let blocked_terms = [
+    let blocked_substrings = [
         "lofi",
         "lo-fi",
         "study beats",
@@ -288,6 +290,18 @@ fn is_clean_underdog_track(track: &FullTrack) -> bool {
         "asmr",
         "lullaby",
         "yoga",
+        "spoken word",
+        "interview",
+        "monologue",
+    ];
+
+    let blocked_keywords = [
+        "intro",
+        "outro",
+        "interlude",
+        "prelude",
+        "skit",
+        "transition",
     ];
 
     let title_lower = track.name.to_lowercase();
@@ -298,14 +312,22 @@ fn is_clean_underdog_track(track: &FullTrack) -> bool {
         .map(|a| a.name.to_lowercase())
         .unwrap_or_default();
 
-    for term in &blocked_terms {
+    for term in &blocked_substrings {
         if title_lower.contains(term) || album_lower.contains(term) || artist_lower.contains(term) {
             return false;
         }
     }
 
-    // Filter ook losse intro/skit tracks onder 45 seconden eruit
-    if track.duration.num_seconds() < 45 {
+    // Skip-rate defense: filter expliciete intro/outro/skit tracks eruit
+    for word in title_lower.split(|c: char| !c.is_alphanumeric()) {
+        if blocked_keywords.contains(&word) {
+            return false;
+        }
+    }
+
+    // Anti-skip retention: filter tracks onder 75s (vaak audio-samples) of langer dan 10 min (drones)
+    let duration_sec = track.duration.num_seconds();
+    if !(75..=600).contains(&duration_sec) {
         return false;
     }
 
@@ -499,6 +521,17 @@ async fn run_sync(config_path: &str, dry_run: bool, archive_dir: &str) -> Result
 
         println!("  ✨ {} obscure tracks gevonden.", tracks.len());
 
+        // Algoritme-optimalisatie (Anti-skip): zorg dat de openingsposities tracks zijn met ideale radiolengte (2m15s - 4m45s)
+        if tracks.len() > 3 {
+            if let Some(pos) = tracks.iter().position(|t| {
+                let s = t.duration.num_seconds();
+                (135..=285).contains(&s)
+            }) {
+                let opener = tracks.remove(pos);
+                tracks.insert(0, opener);
+            }
+        }
+
         let mut anchor_track_name = String::new();
         // Zoek de anchor track op en plaats deze in de top posities (indien geconfigureerd)
         if let Some(ref query) = pl.anchor_track_query {
@@ -595,11 +628,13 @@ async fn run_sync(config_path: &str, dry_run: bool, archive_dir: &str) -> Result
             .await
             .with_context(|| format!("Kon tracks niet vervangen voor playlist {}", pl.name))?;
 
-        // Beschrijving bijwerken met datum en open-source credit
-        let description = format!(
-            "Daily underdog discovery ({}). Under 1K streams. Curated by {} // Powered by open-source sub1k-sync",
-            today, config.settings.anchor_artist
-        );
+        // Beschrijving bijwerken met geoptimaliseerde SEO-tagline of dynamische fallback
+        let description = pl.description.clone().unwrap_or_else(|| {
+            format!(
+                "Daily underdog discovery ({}). Under 1K streams. Curated by {} // Powered by open-source sub1k-sync",
+                today, config.settings.anchor_artist
+            )
+        });
 
         let _ = spotify
             .playlist_change_detail(playlist_id, None, None, Some(&description), None)

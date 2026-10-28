@@ -222,7 +222,7 @@ function setupCommunityFormSync() {
 
   function updatePlBsky() {
     const g = plGenre ? plGenre.value.trim() : '';
-    let text = `📡 Sub-1K Station Request: @fabian2u.bsky.social\nProposing new daily radio: "${g || '...'}"\n#sub1k #undergroundmusic`;
+    let text = `📡 Sub-1K Station Request: @fabian2u.bsky.social\nProposing new weekly radio: "${g || '...'}"\n#sub1k #undergroundmusic`;
     if (bskyPlBtn) {
       bskyPlBtn.href = `https://bsky.app/intent/compose?text=${encodeURIComponent(text)}`;
     }

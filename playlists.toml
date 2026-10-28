@@ -21,7 +21,7 @@ anchor_max_position = 1
 [[playlists]]
 name = "Dark Electronic & Industrial Underdogs [<1K Streams]"
 spotify_playlist_id = "1kmZVpw99RovDgeLYfHoPa"
-description = "The darkest underground darksynth, industrial, cyberpunk & EBM under 1,000 streams. Deep focus for coding, gaming & night drives. Curated by THE SILICON RITE. Updated daily."
+description = "The darkest underground darksynth, industrial, cyberpunk & EBM under 1,000 streams. Deep focus for coding, gaming & night drives. Curated by THE SILICON RITE. Updated weekly every Friday."
 genres = [
     "darksynth",
     "industrial",
@@ -44,7 +44,7 @@ anchor_track_query = "artist:\"THE SILICON RITE\""
 [[playlists]]
 name = "Heavy Deathcore & Beatdown Underdogs [<1K Streams]"
 spotify_playlist_id = "66cUj6IKJvO6UG12bhHxFb"
-description = "The heaviest underground deathcore, beatdown, slam & downtempo under 1,000 streams. Brutal breakdowns for heavy gym PRs, lifting & aggression. Updated daily."
+description = "The heaviest underground deathcore, beatdown, slam & downtempo under 1,000 streams. Brutal breakdowns for heavy gym PRs, lifting & aggression. Updated weekly every Friday."
 genres = [
     "deathcore",
     "beatdown",

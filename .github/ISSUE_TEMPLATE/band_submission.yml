@@ -1,5 +1,5 @@
 name: "🎸 Submit a Band (<1K Streams)"
-description: "Submit an underground band or track (<1,000 streams) for daily radio rotation."
+description: "Submit an underground band or track (<1,000 streams) for weekly radio rotation."
 title: "[BAND]: <Artist / Track Name>"
 labels: ["band-submission", "community-radar"]
 body:

@@ -1,9 +1,9 @@
-name: Daily Spotify Underdog Playlist Refresh
+name: Weekly Spotify Underdog Playlist Refresh
 
 on:
   schedule:
-    # Elke ochtend om 05:17 UTC (niet op :00 om GitHub Actions cron-files te vermijden)
-    - cron: '17 5 * * *'
+    # Elke vrijdagochtend om 05:17 UTC (niet op :00 om GitHub Actions cron-files te vermijden)
+    - cron: '17 5 * * 5'
   workflow_dispatch: # Knop in GitHub UI om handmatig direct te testen
 
 permissions:
@@ -32,7 +32,7 @@ jobs:
           N8N_WEBHOOK_URL: ${{ secrets.N8N_WEBHOOK_URL }}
         run: cargo run --release --bin sub1k-sync -- sync --config playlists.toml --archive-dir docs/data
 
-      - name: Commit & Push Daily Track Archive
+      - name: Commit & Push Weekly Track Archive
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -40,6 +40,6 @@ jobs:
           if git diff --staged --quiet; then
             echo "Geen nieuwe wijzigingen in archief om te committen."
           else
-            git commit -m "chore(archive): automated daily underdog vault update [skip ci]"
+            git commit -m "chore(archive): automated weekly underdog vault update [skip ci]"
             git push origin main
           fi

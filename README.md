@@ -11,8 +11,8 @@
 
 ---
 
-### 🎧 Live Spotify Underdog Radios (Updated Daily)
-Stream the latest daily batch of obscure underground tracks (<1,000 streams) curated by `sub1k-sync`:
+### 🎧 Live Spotify Underdog Radios (Updated Weekly)
+Stream the latest weekly batch of obscure underground tracks (<1,000 streams) curated by `sub1k-sync`:
 * 🎛️ [**Dark Electronic & Industrial Underdogs (<1K)**](https://open.spotify.com/playlist/1kmZVpw99RovDgeLYfHoPa) — *Darksynth, Cyberpunk, Industrial & EBM for deep coding and night focus.*
 * 🔨 [**Heavy Deathcore & Beatdown Underdogs (<1K)**](https://open.spotify.com/playlist/66cUj6IKJvO6UG12bhHxFb) — *Brutal underground deathcore, beatdown & slam for heavy gym PRs and lifting.*
 
@@ -116,9 +116,9 @@ sub1k rescue <TRACK_ID> # Save a track to Liked Songs
 
 ## 🤖 `sub1k-sync`: Zero-Maintenance Spotify Auto-Curator
 
-Want to run your own automated radio station on Spotify that refreshes daily and runs **100% free on GitHub Actions**?
+Want to run your own automated radio station on Spotify that refreshes weekly and runs **100% free on GitHub Actions**?
 
-`sub1k-sync` is a headless daemon that scans Spotify for tracks under 1,000 streams across your favourite genres, updates your playlists every morning at 04:00 UTC, and anchors your own artist in the top slots.
+`sub1k-sync` is a headless daemon that scans Spotify for tracks under 1,000 streams across your favourite genres, updates your playlists every Friday morning, and anchors your own artist in the top slots.
 
 ### Quick Setup for GitHub Actions:
 
@@ -145,5 +145,5 @@ Want to run your own automated radio station on Spotify that refreshes daily and
    * `RSPOTIFY_CLIENT_ID`
    * `RSPOTIFY_CLIENT_SECRET`
    * `SPOTIFY_REFRESH_TOKEN`
-5. Enable GitHub Actions (`.github/workflows/daily_sync.yml`). Your playlists will automatically refresh daily!
+5. Enable GitHub Actions (`.github/workflows/weekly_sync.yml`). Your playlists will automatically refresh weekly every Friday!
 

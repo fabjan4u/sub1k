@@ -631,7 +631,7 @@ async fn run_sync(config_path: &str, dry_run: bool, archive_dir: &str) -> Result
         // Beschrijving bijwerken met geoptimaliseerde SEO-tagline of dynamische fallback
         let description = pl.description.clone().unwrap_or_else(|| {
             format!(
-                "Daily underdog discovery ({}). Under 1K streams. Curated by {} // Powered by open-source sub1k-sync",
+                "Weekly underdog discovery ({}). Under 1K streams. Curated by {} // Powered by open-source sub1k-sync",
                 today, config.settings.anchor_artist
             )
         });

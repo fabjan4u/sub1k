@@ -1,5 +1,5 @@
 name: "📡 Request a New Station / Genre Playlist"
-description: "Suggest a new underground genre or playlist to add to Sub-1K's daily automated rotation."
+description: "Suggest a new underground genre or playlist to add to Sub-1K's weekly automated rotation."
 title: "[PLAYLIST]: <Genre / Playlist Theme Name>"
 labels: ["playlist-request", "new-station"]
 body:
@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         We want to expand Sub-1K across all underground subcultures!
-        Suggest a genre that deserves automated daily underdog curation.
+        Suggest a genre that deserves automated weekly underdog curation.
   - type: input
     id: genre_name
     attributes:

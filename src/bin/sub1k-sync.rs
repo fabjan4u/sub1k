@@ -686,6 +686,23 @@ async fn run_sync(config_path: &str, dry_run: bool, archive_dir: &str) -> Result
                     ""
                 };
 
+                let tracks_summary: Vec<serde_json::Value> = tracks
+                    .iter()
+                    .map(|t| {
+                        let first_artist = t
+                            .artists
+                            .first()
+                            .map(|a| a.name.clone())
+                            .unwrap_or_default();
+                        let art_url = t.album.images.first().map(|img| img.url.clone());
+                        serde_json::json!({
+                            "artist": first_artist,
+                            "title": t.name,
+                            "album_art": art_url
+                        })
+                    })
+                    .collect();
+
                 let payload = serde_json::json!({
                     "event": "playlist_updated",
                     "playlist_name": pl.name,
@@ -695,6 +712,7 @@ async fn run_sync(config_path: &str, dry_run: bool, archive_dir: &str) -> Result
                     "anchor_track": anchor_track_name,
                     "total_tracks": tracks.len(),
                     "artists": artist_names,
+                    "tracks": tracks_summary,
                     "tweet_text": tweet_text,
                     "timestamp": chrono::Utc::now().to_rfc3339()
                 });
